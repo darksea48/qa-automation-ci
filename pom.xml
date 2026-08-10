@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ============================================================================
+  Taller 1 - Evaluación Unidad II  |  Automatización de Pruebas (ADP1323)
+  Proyecto: qa-automation-ci
+  Objetivo: demostrar un flujo básico de Integración Continua sobre un
+            proyecto Java, con gestión de dependencias vía Maven,
+            pruebas unitarias atómicas (JUnit 5) y pruebas BDD (Cucumber).
+  ============================================================================
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <!-- Coordenadas del artefacto: identifican de forma única el proyecto -->
+    <groupId>cl.iplacex.qa</groupId>
+    <artifactId>qa-automation-ci</artifactId>
+    <version>1.0.0</version>
+    <packaging>jar</packaging>
+    <name>qa-automation-ci</name>
+    <description>Suite de pruebas automatizadas (unitarias + BDD) integrada a CI</description>
+
+    <properties>
+        <!-- Centralizar versiones evita inconsistencias entre dependencias -->
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+        <junit.jupiter.version>5.10.2</junit.jupiter.version>
+        <junit.platform.version>1.10.2</junit.platform.version>
+        <cucumber.version>7.15.0</cucumber.version>
+        <surefire.version>3.2.5</surefire.version>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <!-- BOM de JUnit 5: alinea todas las versiones del ecosistema JUnit -->
+            <dependency>
+                <groupId>org.junit</groupId>
+                <artifactId>junit-bom</artifactId>
+                <version>${junit.jupiter.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <!-- BOM de Cucumber: misma idea, evita conflictos de versiones -->
+            <dependency>
+                <groupId>io.cucumber</groupId>
+                <artifactId>cucumber-bom</artifactId>
+                <version>${cucumber.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <dependencies>
+        <!-- ================= PRUEBAS UNITARIAS ================= -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- ================= PRUEBAS BDD ======================= -->
+        <dependency>
+            <groupId>io.cucumber</groupId>
+            <artifactId>cucumber-java</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.cucumber</groupId>
+            <artifactId>cucumber-junit-platform-engine</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- Permite declarar la suite BDD con @Suite (JUnit Platform) -->
+        <dependency>
+            <groupId>org.junit.platform</groupId>
+            <artifactId>junit-platform-suite</artifactId>
+            <version>${junit.platform.version}</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <!--
+              Surefire ejecuta TODAS las pruebas (unitarias y BDD) durante la
+              fase 'test'. Genera los XML/TXT que luego el pipeline publica
+              como reporte navegable.
+            -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>${surefire.version}</version>
+                <configuration>
+                    <includes>
+                        <include>**/*Test.java</include>
+                        <include>**/*Runner.java</include>
+                    </includes>
+                    <!-- Falla el build si una prueba falla: puerta de calidad de CI -->
+                    <testFailureIgnore>false</testFailureIgnore>
+                </configuration>
+            </plugin>
+
+            <!--
+              Genera el reporte HTML navegable de Surefire en
+              target/site/surefire-report.html (métricas funcionales).
+            -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-report-plugin</artifactId>
+                <version>${surefire.version}</version>
+            </plugin>
+        </plugins>
+    </build>
+</project>
