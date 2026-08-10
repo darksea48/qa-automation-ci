@@ -1,0 +1,40 @@
+# ===== Artefactos de compilación Maven =====
+target/
+!.mvn/wrapper/maven-wrapper.jar
+.mvn/timing.properties
+pom.xml.versionsBackup
+
+# ===== Reportes generados (se regeneran en cada ejecución) =====
+target/surefire-reports/
+target/cucumber-reports/
+target/site/
+allure-results/
+allure-report/
+performance/resultados/
+
+# ===== IDE =====
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+.settings/
+.project
+.classpath
+nbproject/
+
+# ===== Sistema operativo =====
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ===== Logs y temporales =====
+*.log
+*.tmp
+*.bak
+hs_err_pid*
+
+# ===== Secretos: nunca deben viajar al repositorio =====
+.env
+*.pem
+credenciales.properties
