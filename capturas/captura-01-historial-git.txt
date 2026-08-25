@@ -1,0 +1,36 @@
+﻿================================================================================
+  CAPTURA 01 - Historial de commits y ramas (gestion de versiones)
+================================================================================
+  Comando ejecutado : git log --oneline --graph --all
+  Fecha y hora      : 25-08-2026 14:44:58
+  Equipo            : SUAREZJARA-PC
+  Usuario           : Douglas Suárez Z
+  Directorio        : C:\dev\qa-automation-ci
+  Codigo de salida  : 0
+================================================================================
+
+* a80ad87 docs: incorpora informe del taller al repositorio
+* fbe9a09 docs: agrega historial de versionado como evidencia
+* 0afa99c docs: documenta objetivos, estructura, comandos y pipeline en README
+*   b62c2b2 merge: integra feature/performance-k6 a main
+|\  
+| * 0f5b2f1 perf: agrega prueba de carga k6 sobre login con umbrales de latencia y error
+|/  
+*   6678f84 merge: integra feature/bdd-login a main tras aprobacion del pull request
+|\  
+| * f379224 test(auth): agrega pruebas unitarias de bloqueo e intentos fallidos
+| * 1e6c796 test(bdd): implementa step definitions y runner con reportes HTML, JSON y JUnit XML
+| * 5fa8c07 test(bdd): agrega feature de login en Gherkin con Scenario Outline y Examples
+| * cc39664 feat(auth): implementa ServicioAutenticacion segun criterios de la sesion Three Amigos
+|/  
+*   233b4a1 merge: integra feature/pipeline-ci a main
+|\  
+| * 233ca7f ci: agrega pipeline de GitHub Actions que compila y ejecuta tests en cada push
+|/  
+*   6e52e28 merge: integra feature/pruebas-unitarias a main tras revision de pares
+|\  
+| * 96dd528 test(calculo): agrega pruebas unitarias atomicas de suma, resta y division por cero
+| * bf7af1c feat(calculo): agrega clase Calculadora sin estado para operaciones basicas
+|/  
+* 3952f11 build: configura proyecto Maven con dependencias JUnit 5 y plugin Surefire
+* 4bac7ed chore: inicializa repositorio con .gitignore y README base

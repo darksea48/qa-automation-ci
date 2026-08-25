@@ -1,0 +1,48 @@
+# =============================================================================
+#  Normalización de fin de línea
+#
+#  Windows usa CRLF y Linux/macOS usan LF. Sin esta configuración, cada vez que
+#  un integrante del equipo con otro sistema operativo toca un archivo, Git lo
+#  reporta como modificado por completo aunque no haya cambiado una sola letra.
+#  Eso ensucia el historial, hace ilegibles los diffs de los pull requests y
+#  provoca conflictos de merge falsos.
+#
+#  'text=auto' hace que Git almacene SIEMPRE en LF dentro del repositorio y
+#  entregue el fin de línea propio de cada sistema en el directorio de trabajo.
+# =============================================================================
+
+* text=auto
+
+# --- Archivos que deben conservar CRLF sí o sí en el directorio de trabajo ---
+# Los scripts de Windows pueden fallar si se les entrega con LF.
+*.ps1   text eol=crlf
+*.bat   text eol=crlf
+*.cmd   text eol=crlf
+
+# --- Archivos que deben conservar LF sí o sí ---
+# Los scripts que ejecuta el runner Linux del pipeline.
+*.sh    text eol=lf
+*.yml   text eol=lf
+*.yaml  text eol=lf
+
+# --- Código fuente y configuración: normalización estándar ---
+*.java      text
+*.xml       text
+*.md        text
+*.feature   text
+*.js        text
+*.json      text
+*.properties text
+*.gitignore text
+
+# --- Binarios: Git no debe tocarlos nunca ---
+*.png   binary
+*.jpg   binary
+*.jpeg  binary
+*.gif   binary
+*.pdf   binary
+*.docx  binary
+*.xlsx  binary
+*.zip   binary
+*.jar   binary
+*.mp3   binary

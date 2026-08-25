@@ -1,0 +1,56 @@
+﻿================================================================================
+  CAPTURA 11b - Ejecucion selectiva del smoke test con la etiqueta @smoke
+================================================================================
+  Comando ejecutado : mvn -B test -Dtest=BddTestRunner -Dcucumber.filter.tags=@smoke
+  Fecha y hora      : 25-08-2026 14:45:23
+  Equipo            : SUAREZJARA-PC
+  Usuario           : Douglas Suárez Z
+  Directorio        : C:\dev\qa-automation-ci
+  Codigo de salida  : 0
+================================================================================
+
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] -------------------< cl.iplacex.qa:qa-automation-ci >-------------------
+[INFO] Building qa-automation-ci 1.0.0
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.4.0:resources (default-resources) @ qa-automation-ci ---
+[INFO] skip non existing resourceDirectory C:\dev\qa-automation-ci\src\main\resources
+[INFO] 
+[INFO] --- compiler:3.15.0:compile (default-compile) @ qa-automation-ci ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.4.0:testResources (default-testResources) @ qa-automation-ci ---
+[INFO] Copying 1 resource from src\test\resources to target\test-classes
+[INFO] 
+[INFO] --- compiler:3.15.0:testCompile (default-testCompile) @ qa-automation-ci ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- surefire:3.2.5:test (default-test) @ qa-automation-ci ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[INFO] 
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running cl.iplacex.qa.bdd.runner.BddTestRunner
+
+@login @smoke @critico
+Escenario: Ingreso exitoso con credenciales válidas                         # features/login.feature:18
+  Dado que el portal de autenticación está disponible                       # cl.iplacex.qa.bdd.steps.LoginSteps.elPortalEstaDisponible()
+  Cuando el usuario ingresa el usuario "douglas" y la contraseña "Clave123" # cl.iplacex.qa.bdd.steps.LoginSteps.elUsuarioIngresaCredenciales(java.lang.String,java.lang.String)
+  Entonces el sistema concede el acceso                                     # cl.iplacex.qa.bdd.steps.LoginSteps.elSistemaConcedeElAcceso()
+  Y se muestra el mensaje "Bienvenido douglas"                              # cl.iplacex.qa.bdd.steps.LoginSteps.seMuestraElMensaje(java.lang.String)
+[WARNING] Tests run: 6, Failures: 0, Errors: 0, Skipped: 5, Time elapsed: 0.499 s -- in cl.iplacex.qa.bdd.runner.BddTestRunner
+[INFO] 
+[INFO] Results:
+[INFO] 
+[WARNING] Tests run: 6, Failures: 0, Errors: 0, Skipped: 5
+[INFO] 
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  2.537 s
+[INFO] Finished at: 2026-08-25T14:45:23-04:00
+[INFO] ------------------------------------------------------------------------

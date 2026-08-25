@@ -1,0 +1,37 @@
+﻿================================================================================
+  INDICE DE EVIDENCIAS - Taller 1, Unidad II
+  Generado el 25-08-2026 14:48
+================================================================================
+
+ARCHIVOS .TXT GENERADOS POR ESTE SCRIPT (captura desde el Bloc de notas)
+--------------------------------------------------------------------------------
+  01   historial-git                 Historial de commits y ramas
+  02   ramas-git                     Ramas del repositorio y detalle de commits
+  03   dependencias-maven            Arbol de dependencias resueltas
+  07   ejecucion-local-completa      mvn clean test - 18 pruebas en verde
+  09   fallo-intencional             BUILD FAILURE - la puerta de calidad bloquea
+  11   escenarios-bdd                Los 6 escenarios Gherkin ejecutados
+  11b  smoke-test-por-etiqueta       Ejecucion selectiva con @smoke (opcional)
+  14   performance-k6                TPS, latencia p95/p99 y tasa de error
+
+SE ABREN EN EL NAVEGADOR (captura con Win+Shift+S)
+--------------------------------------------------------------------------------
+  06   surefire-report.html          Reporte HTML de pruebas unitarias
+  12   cucumber.html                 Reporte BDD navegable (expande un escenario)
+
+REQUIEREN SUBIR EL PROYECTO A GITHUB (ver Paso 7 de la guia)
+--------------------------------------------------------------------------------
+  04   Pestana Actions con la ejecucion en verde
+  05   Detalle de los pasos del job build-and-test
+  08   Pruebas ejecutandose dentro de GitHub Actions
+  13   Artefactos descargables de la ejecucion
+  15   Dashboard publicado / resumen de la ejecucion
+  16   Tarjeta de resultados de pruebas en el resumen del build
+
+SE SIMULAN O SE ARMAN A MANO (ver Paso 9 de la guia)
+--------------------------------------------------------------------------------
+  10   Tablero con los criterios de la sesion Three Amigos
+  17   Mensaje de alerta en Slack
+  18   Issue creado automaticamente por el pipeline
+
+================================================================================

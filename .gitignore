@@ -38,3 +38,6 @@ hs_err_pid*
 .env
 *.pem
 credenciales.properties
+
+# ===== Salidas manuales sueltas =====
+salida-pruebas.txt
