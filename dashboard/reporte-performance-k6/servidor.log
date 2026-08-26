@@ -1,0 +1,2 @@
+Error: Could not find or load main class cl.iplacex.qa.app.ServidorLogin
+Caused by: java.lang.ClassNotFoundException: cl.iplacex.qa.app.ServidorLogin
