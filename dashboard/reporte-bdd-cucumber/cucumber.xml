@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="Cucumber" time="0.216" tests="6" skipped="0" failures="0" errors="0">
-<testcase classname="Autenticación de usuarios en el portal" name="Ingreso exitoso con credenciales válidas" time="0.023">
+<testsuite name="Cucumber" time="0.252" tests="6" skipped="0" failures="0" errors="0">
+<testcase classname="Autenticación de usuarios en el portal" name="Ingreso exitoso con credenciales válidas" time="0.024">
 <system-out><![CDATA[
 Dado que el portal de autenticación está disponible.........................passed
 Cuando el usuario ingresa el usuario "douglas" y la contraseña "Clave123"...passed
