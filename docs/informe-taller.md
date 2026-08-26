@@ -34,7 +34,7 @@
 
 ## 1. Introducción
 
-Una empresa solicita profesionalizar su proceso de pruebas automatizadas sobre un proyecto Java. El presente taller documenta la construcción, de principio a fin, de un flujo de integración continua que articula los contenidos de la **Unidad I** (estrategias de prueba, atomicidad con alta cohesión y bajo acoplamiento, selección del test adecuado, conformación del equipo de test) con los de la **Unidad II** (integración continua, BDD, pipelines, métricas, reporting y alertas).
+Una empresa nos pide profesionalizar su proceso de pruebas automatizadas sobre un proyecto Java. En este taller documentamos, de principio a fin, la construcción de un flujo de integración continua que articula los contenidos de la **Unidad I** (estrategias de prueba, atomicidad con alta cohesión y bajo acoplamiento, selección del test adecuado, conformación del equipo de test) con los de la **Unidad II** (integración continua, BDD, pipelines, métricas, reporting y alertas).
 
 El resultado es el repositorio `qa-automation-ci`, cuya premisa de diseño es simple: **cada cambio que entra al repositorio debe demostrar por sí mismo que no rompió nada**, sin intervención manual y con evidencia navegable para todo el equipo.
 
@@ -55,7 +55,7 @@ El resultado es el repositorio `qa-automation-ci`, cuya premisa de diseño es si
 
 ### 2.1 Gestión de versiones con Git
 
-**Estrategia de ramificación.** Se adoptó un modelo *feature branch*: `main` se mantiene siempre en estado desplegable y cada unidad de trabajo se desarrolla en su propia rama, que se integra mediante *pull request* previa revisión de pares. Esto materializa el criterio de la Unidad I sobre **conformación del equipo de test y desarrollo**: el código de prueba se revisa con el mismo rigor que el productivo.
+**Estrategia de ramificación.** Adoptamos un modelo *feature branch*: `main` se mantiene siempre en estado desplegable y cada unidad de trabajo se desarrolla en su propia rama, que integramos mediante *pull request* previa revisión de pares. Con esto materializamos el criterio de la Unidad I sobre **conformación del equipo de test y desarrollo**: el código de prueba se revisa con el mismo rigor que el productivo.
 
 Ramas creadas:
 
@@ -94,9 +94,15 @@ git merge --no-ff feature/pruebas-unitarias -m "merge: integra feature/pruebas-u
 git log --oneline --graph --all
 ```
 
-**Historial resultante** (salida real de `git log --oneline --graph --all`):
+**Historial resultante** (salida real de `git log --oneline --graph --all`, 22 commits):
 
 ```
+* 53e82ec fix(ci): declara el webhook a nivel de job para que la condicion pueda leerlo
+* 3e997eb ci: distingue degradacion de performance de fallo de la herramienta
+* 31a90f6 chore: agrega scripts de generacion de evidencias y publicacion
+* b07afbc chore: normaliza fin de linea con .gitattributes
+* 747397d fix(perf): distingue rechazos de negocio de fallos de red en la prueba k6
+* a80ad87 docs: incorpora informe del taller al repositorio
 * fbe9a09 docs: agrega historial de versionado como evidencia
 * 0afa99c docs: documenta objetivos, estructura, comandos y pipeline en README
 *   b62c2b2 merge: integra feature/performance-k6 a main
@@ -125,7 +131,7 @@ git log --oneline --graph --all
 
 **Decisiones tomadas y su fundamento**
 
-- **Commits pequeños y frecuentes (13 commits).** Un commit por cambio conceptual. Si una prueba falla, `git bisect` identifica el commit culpable en pocos pasos; con commits gigantes eso es imposible.
+- **Commits pequeños y frecuentes (22 commits, 5 ramas).** Un commit por cambio conceptual. Si una prueba falla, `git bisect` identifica el commit culpable en pocos pasos; con commits gigantes eso es imposible. Los commits posteriores a la construcción inicial (`fix(perf)`, `fix(ci)`, `chore: normaliza fin de linea`) documentan las correcciones que surgieron al ejecutar realmente el pipeline, y son parte legítima del historial: un repositorio sin correcciones o no se ejecutó nunca, o se le reescribió la historia.
 - **Convención Conventional Commits.** El prefijo (`feat`, `test`, `ci`, `build`, `docs`, `perf`, `chore`) clasifica el cambio y el ámbito entre paréntesis indica el módulo. Permite generar changelogs automáticos y filtrar el historial (`git log --grep="^test"`).
 - **Separación del commit de código y del commit de prueba.** Deja visible en el historial que la prueba fue escrita como artefacto propio y no como añadido posterior.
 - **`--no-ff` en los merges.** Sin él, Git aplanaría la rama y se perdería la traza de qué commits pertenecieron a qué unidad de trabajo. Con `--no-ff` el grafo documenta el flujo de trabajo del equipo.
@@ -213,7 +219,7 @@ El archivo `pom.xml` centraliza toda la gestión de dependencias. Fragmento rele
 
 ### 2.3 Pruebas unitarias atómicas
 
-El enunciado pide al menos dos pruebas unitarias atómicas e independientes. Se implementaron **doce** (ocho para `Calculadora`, cuatro para `ServicioAutenticacion`).
+El enunciado pide al menos dos pruebas unitarias atómicas e independientes. Nosotros implementamos **doce** (ocho para `Calculadora`, cuatro para `ServicioAutenticacion`).
 
 #### El diseño del código bajo prueba condiciona la atomicidad
 
@@ -317,29 +323,16 @@ Este es un criterio explícito de la pauta. La decisión aplicada fue:
 | Regla de negocio visible al usuario | Escenario **BDD** (Actividad 2) | El criterio de aceptación se escribe en el lenguaje del negocio |
 | Comportamiento bajo carga | Prueba de **performance** (k6) | Ninguna prueba funcional detecta una degradación de latencia |
 
-**Verificación de la lógica.** Se ejecutó una verificación independiente de las 15 aserciones que sustentan las pruebas unitarias y los escenarios BDD, sobre las clases compiladas del proyecto:
+**Resultado de la ejecución real** (`mvn clean test`):
 
 ```
-== Unitarias Calculadora ==
-  PASS  7+5=12
-  PASS  10-4=6
-  PASS  999*0=0
-  PASS  0+0
-  PASS  -5+5
-  PASS  -3+-7
-  PASS  100+250
-  PASS  dividir por cero lanza excepcion
-== Escenarios BDD (mismos datos del .feature) ==
-  PASS  login exitoso
-  PASS  acceso concedido
-  PASS  outline fila 1
-  PASS  outline fila 2
-  PASS  outline fila 3
-  PASS  outline fila 4
-  PASS  bloqueo tras 3 intentos
-
-Total: 15  PASS=15  FAIL=0
+[INFO] Running cl.iplacex.qa.unit.CalculadoraTest
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.116 s
+[INFO] Running cl.iplacex.qa.unit.ServicioAutenticacionTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.011 s
 ```
+
+Las doce pruebas unitarias se ejecutan en 127 milisegundos combinados. Esa velocidad no es un detalle estético: una suite que tarda minutos deja de ejecutarse antes de cada cambio, y una suite que no se ejecuta no protege nada. La rapidez es consecuencia directa del bajo acoplamiento — sin base de datos, sin red, sin configuración previa.
 
 ---
 
@@ -348,17 +341,19 @@ Total: 15  PASS=15  FAIL=0
 ```
 qa-automation-ci/
 ├── .github/workflows/ci.yml            # Pipeline de integración continua
+├── capturas/                           # Evidencia generada de cada ejecución
 ├── docs/
-│   ├── capturas/                       # Evidencia de ejecución
 │   └── historial-git.txt
 ├── performance/login-performance.js    # Prueba de carga k6
 ├── src/
 │   ├── main/java/cl/iplacex/qa/
 │   │   ├── calculo/Calculadora.java
-│   │   └── auth/
-│   │       ├── ServicioAutenticacion.java
-│   │       ├── EstadoLogin.java
-│   │       └── ResultadoLogin.java
+│   │   ├── auth/
+│   │   │   ├── ServicioAutenticacion.java
+│   │   │   ├── EstadoLogin.java
+│   │   │   └── ResultadoLogin.java
+│   │   └── app/
+│   │       └── ServidorLogin.java      # Expone el servicio para medirlo
 │   └── test/
 │       ├── java/cl/iplacex/qa/
 │       │   ├── unit/
@@ -368,6 +363,9 @@ qa-automation-ci/
 │       │       ├── runner/BddTestRunner.java
 │       │       └── steps/LoginSteps.java
 │       └── resources/features/login.feature
+├── capturar-evidencias.ps1             # Genera la evidencia de cada prueba
+├── subir-a-github.ps1                  # Automatiza commits y publicación
+├── .gitattributes                      # Normalización de fin de línea
 ├── .gitignore
 ├── pom.xml
 └── README.md
@@ -380,7 +378,17 @@ qa-automation-ci/
 - `steps/` separado de `runner/`: el runner es configuración, los steps son código de prueba. Mezclarlos dificulta agregar una segunda suite BDD.
 - `features/` en `resources`: los archivos `.feature` son **documentación ejecutable**. Ubicarlos fuera de `java/` deja claro que un analista funcional puede leerlos y proponer cambios.
 - `performance/` en la raíz: la prueba de carga no es Java y no forma parte del ciclo de vida de Maven; tiene su propio ejecutor (k6).
-- `docs/`: la evidencia acompaña al código en el mismo repositorio, versionada.
+- `app/ServidorLogin.java` separado de `auth/`: el servicio de dominio no debe saber que se expone por HTTP. Manteniendo la capa de transporte aparte, la misma clase se prueba de tres formas —unitaria, BDD y de carga— sin que ninguna contamine a las otras.
+- `capturas/` y `docs/`: la evidencia acompaña al código en el mismo repositorio, versionada junto a la ejecución que la produjo.
+
+**`.gitattributes`.** Lo agregamos al detectar que, al trabajar desde Windows, los dieciséis archivos del proyecto aparecían como modificados por completo sin haber cambiado una sola letra: Windows usa CRLF y el runner Linux del pipeline usa LF. Sin normalización, cada cambio de sistema operativo ensucia el historial, hace ilegibles los diffs de los pull requests y genera conflictos de merge falsos.
+
+```gitattributes
+* text=auto           # el repositorio guarda LF; cada SO recibe lo suyo
+*.ps1  text eol=crlf  # los scripts de Windows requieren CRLF
+*.yml  text eol=lf    # los ejecuta el runner Linux
+*.png  binary         # Git no debe tocarlos nunca
+```
 
 **`.gitignore`** (extracto comentado):
 
@@ -433,6 +441,14 @@ on:
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
+
+# Por seguridad, GitHub entrega un token de SOLO LECTURA. Aquí se conceden
+# explícitamente y de forma mínima los permisos que cada acción necesita.
+permissions:
+  contents: write        # desplegar el dashboard
+  checks: write          # publicar el reporte de pruebas en el commit
+  issues: write          # crear el issue automático ante fallo
+  pull-requests: write
 
 jobs:
   build-and-test:
@@ -504,6 +520,7 @@ push / pull request / cron 08:00 días hábiles
 
 | Decisión | Fundamento |
 |---|---|
+| Bloque `permissions` explícito | GitHub entrega por defecto un token de solo lectura. Sin declarar `checks: write` el reporte de pruebas no se publica y sin `contents: write` falla el dashboard. Concederlos de forma mínima y explícita, en vez de dejar permisos amplios por comodidad, es el principio de menor privilegio aplicado al pipeline. |
 | Disparadores en `push` **y** `pull_request` | El push da feedback al autor; el PR protege a `main` de recibir código roto. |
 | `schedule` con cron | Una regresión diaria detecta fallos causados por factores externos (dependencias, entorno) aunque nadie haya subido código. |
 | `concurrency` + `cancel-in-progress` | Ante tres push seguidos solo se ejecuta el último. Ahorra minutos de CI y evita reportes contradictorios. |
@@ -561,23 +578,26 @@ Reportes producidos:
 mvn clean test
 ```
 
-**Salida esperada:**
+**Salida obtenida:**
 
 ```
 [INFO] -------------------------------------------------------
 [INFO]  T E S T S
 [INFO] -------------------------------------------------------
 [INFO] Running cl.iplacex.qa.unit.CalculadoraTest
-[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.116 s
 [INFO] Running cl.iplacex.qa.unit.ServicioAutenticacionTest
-[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.011 s
 [INFO] Running cl.iplacex.qa.bdd.runner.BddTestRunner
-[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.561 s
 [INFO]
 [INFO] Results:
 [INFO] Tests run: 18, Failures: 0, Errors: 0, Skipped: 0
 [INFO] BUILD SUCCESS
+[INFO] Total time:  4.423 s
 ```
+
+**Automatización de la evidencia.** Para que la captura de resultados fuera reproducible y no dependiera de recortar la consola a mano, construimos el script `capturar-evidencias.ps1`. Este ejecuta cada suite, graba su salida en un archivo con encabezado (comando, fecha, equipo, usuario y código de salida) y la deja lista para adjuntar. Aplicamos a la evidencia el mismo criterio de automatización que a las pruebas.
 
 > 📸 **Captura 7** — Terminal con la salida de `mvn clean test` (BUILD SUCCESS).
 > 📸 **Captura 8** — Ejecución del mismo comando en GitHub Actions.
@@ -591,7 +611,7 @@ mvn clean test
 
 **Funcionalidad seleccionada:** *Inicio de sesión (Login) en el portal de clientes.*
 
-Se eligió el login porque concentra reglas de negocio, requisitos de seguridad y es la funcionalidad de mayor concurrencia del sistema — lo que la vuelve además el candidato natural para la prueba de performance.
+Elegimos el login porque concentra reglas de negocio, requisitos de seguridad y es la funcionalidad de mayor concurrencia del sistema — lo que la vuelve además el candidato natural para la prueba de performance.
 
 #### Roles y aporte de cada participante
 
@@ -839,84 +859,123 @@ Publicación en CI:
 
 ### 3.6 Prueba de performance e indicadores
 
-**Funcionalidad seleccionada: el login.** Es la puerta de entrada del sistema — si se degrada, todas las demás funcionalidades quedan inaccesibles — y es el punto de mayor concurrencia en la hora peak.
+#### Funcionalidad seleccionada
 
-**Herramienta: k6.** Se eligió sobre JMeter porque el script es un archivo JavaScript versionable junto al código (revisable en un pull request como cualquier otro cambio), corre sin interfaz gráfica y trae umbrales nativos que devuelven un código de salida distinto de cero, lo que permite que el pipeline falle automáticamente ante una degradación.
+Elegimos el **login** por tres razones convergentes. Es la puerta de entrada del sistema: si se degrada, todas las demás funcionalidades quedan inaccesibles, aunque estén perfectamente sanas. Es el punto de mayor concurrencia, porque el ingreso se concentra en la franja de inicio de jornada mientras el resto del tráfico se distribuye durante el día. Y es la misma funcionalidad definida en la sesión Three Amigos y cubierta por los escenarios BDD, de modo que las tres capas de prueba —unitaria, funcional y de carga— convergen sobre el mismo componente.
+
+#### Herramienta seleccionada: k6
+
+Evaluamos también JMeter, pero nos fuimos por k6 porque el script es un archivo JavaScript que se versiona junto al código y se revisa en un pull request como cualquier otro cambio, mientras que un plan `.jmx` es un XML generado por interfaz gráfica, difícil de revisar en un diff. Además k6 corre sin interfaz y sus umbrales devuelven un código de salida distinto de cero, lo que permite que el pipeline reaccione automáticamente ante una degradación.
+
+#### Decisión de diseño: medir la propia aplicación
+
+La primera versión de esta prueba apuntaba a una API pública de terceros. Los resultados fueron los siguientes:
+
+| Indicador | Valor obtenido |
+|---|---|
+| Latencia promedio | 1,76 ms |
+| Latencia p(95) | 2,70 ms |
+| Tasa de respuestas inesperadas | 1,0000 (100%) |
+
+Esas cifras son internamente contradictorias y conviene detenerse en por qué. Una latencia promedio de 1,76 ms es **físicamente imposible** para una petición que viaja por internet hasta un servidor remoto: solo el trayecto de ida y vuelta cuesta decenas de milisegundos. Al mismo tiempo, el 100% de las respuestas resultó inesperada pese a que la prueba declaraba explícitamente los códigos 200, 400 y 401 como válidos, lo que indica que el servidor devolvía un código distinto de esos.
+
+La explicación es que el proveedor detectó 100 usuarios virtuales concurrentes y activó su limitador de tasa, respondiendo con rechazos inmediatos desde su capa de borde sin llegar nunca al servidor de aplicación. **Lo que se estaba midiendo era la velocidad con que un intermediario descarta tráfico, no el rendimiento del login.** Las métricas eran técnicamente correctas y sustantivamente inútiles.
+
+Este episodio ilustra un riesgo central de las pruebas de performance: a diferencia de una prueba funcional, que falla de forma visible, una prueba de carga mal dirigida **entrega números plausibles que nadie cuestiona**. Un informe que reportara "latencia promedio de 1,76 ms" habría pasado por excelente cuando en realidad no medía nada.
+
+La corrección fue eliminar la dependencia externa: se expuso el propio `ServicioAutenticacion` mediante un servidor HTTP liviano construido con `com.sun.net.httpserver`, incluido en el JDK y sin agregar dependencias al proyecto. La prueba de carga mide ahora exactamente el mismo componente que verifican las pruebas unitarias y los escenarios BDD, el resultado es reproducible y no depende de la red ni de la disponibilidad de un tercero.
+
+```java
+/**
+ * Instancia única compartida por todas las peticiones, igual que en una
+ * aplicación real. Por eso ServicioAutenticacion usa colecciones concurrentes.
+ */
+private static final ServicioAutenticacion SERVICIO = new ServicioAutenticacion();
+
+// El estado del dominio se traduce al código HTTP que le corresponde.
+int codigo = switch (resultado.estado()) {
+    case EXITOSO                -> 200;  // acceso concedido
+    case CREDENCIALES_INVALIDAS -> 401;  // rechazo de negocio
+    case DATOS_INCOMPLETOS      -> 400;  // petición mal formada
+    case BLOQUEADO              -> 423;  // recurso bloqueado
+};
+```
+
+#### Perfil de carga
 
 ```javascript
 export const options = {
-  // --- Perfil de carga escalonado (ramping) ---
   stages: [
-    { duration: '30s', target: 10 },  // rampa de subida: calentamiento
-    { duration: '1m',  target: 50 },  // carga nominal esperada en hora peak
+    { duration: '30s', target: 10 },  // calentamiento
+    { duration: '1m',  target: 50 },  // carga nominal de hora peak
     { duration: '30s', target: 100 }, // carga de estrés: 2x lo esperado
-    { duration: '30s', target: 0 },   // rampa de bajada: verifica recuperación
+    { duration: '30s', target: 0 },   // bajada: verifica la recuperación
   ],
-
-  // --- Umbrales (SLO): si no se cumplen, k6 devuelve exit code 99
+  summaryTrendStats: ['avg', 'min', 'med', 'max', 'p(90)', 'p(95)', 'p(99)'],
   thresholds: {
-    'http_req_duration': ['p(95)<800', 'p(99)<1500'],
+    'http_req_duration': ['p(95)<200', 'p(99)<500'],
     'http_req_failed':   ['rate<0.01'],
-    'errores_login':     ['rate<0.01'],
-    'http_reqs':         ['rate>20'],
+    'http_reqs':         ['rate>15'],
   },
 };
-
-export default function () {
-  const payload = JSON.stringify({ username: 'douglas', password: 'Clave123' });
-  const params = {
-    headers: { 'Content-Type': 'application/json' },
-    tags: { funcionalidad: 'login' },
-  };
-
-  const res = http.post(`${BASE_URL}/auth/token/login/`, payload, params);
-
-  const ok = check(res, {
-    'status es 200 o 400 (endpoint alcanzable)': (r) => r.status === 200 || r.status === 400,
-    'responde en menos de 800 ms': (r) => r.timings.duration < 800,
-    'el cuerpo no viene vacío': (r) => r.body && r.body.length > 0,
-  });
-
-  erroresLogin.add(!ok);
-  latenciaLogin.add(res.timings.duration);
-
-  sleep(1); // think time: simula el tiempo real entre acciones de un usuario
-}
 ```
 
-#### Indicadores monitoreados y por qué
+Se usó una **rampa escalonada** y no una carga plana. Una carga plana solo responde "aguanta o no aguanta"; la rampa permite identificar *en qué nivel* de carga aparece la degradación, que es lo que permite dimensionar la infraestructura con evidencia. La rampa de bajada final verifica además que el servicio se **recupera** tras el peak y no queda degradado.
 
-| Indicador | Métrica k6 | Qué mide | Umbral definido | Por qué importa |
-|---|---|---|---|---|
-| **TPS / Throughput** | `http_reqs` (rate) | Transacciones por segundo procesadas | `> 20 req/s` | Es la **capacidad** del sistema. Si el throughput se estanca mientras suben los usuarios virtuales, se encontró el punto de saturación. |
-| **Latencia p(95)** | `http_req_duration` | Tiempo de respuesta bajo el cual está el 95% de las peticiones | `< 800 ms` | Se usa el **percentil, no el promedio**: un promedio de 300 ms puede esconder un 5% de usuarios esperando 4 segundos. El percentil describe la experiencia real del usuario más perjudicado. |
-| **Latencia p(99)** | `http_req_duration` | El 99% de las peticiones | `< 1500 ms` | Vigila la cola larga. En un sistema con miles de sesiones, ese 1% son cientos de personas. |
-| **Tasa de errores** | `http_req_failed` | % de respuestas fuera de 2xx/3xx | `< 1%` | Indicador de **estabilidad**. Un sistema rápido que responde error no está sano; suele indicar agotamiento de pool de conexiones o timeouts. |
-| **Usuarios virtuales** | `vus` | Carga concurrente aplicada | escalonada 10→50→100 | Es la variable independiente: permite correlacionar en qué nivel de carga se degradan los demás indicadores. |
-| **Errores funcionales** | `errores_login` (custom) | Fallos de las validaciones `check()` | `< 1%` | Distingue "respondió lento" de "respondió mal". Un servicio veloz que devuelve datos incorrectos es peor que uno lento. |
+Cada iteración incluye un `sleep(1)` como *think time*. Sin esa pausa no se simularían usuarios sino un ataque de denegación de servicio, y los números resultantes llevarían a sobredimensionar la infraestructura.
 
-**Por qué carga escalonada y no carga plana.** Golpear el sistema de una vez con 100 usuarios solo dice si aguanta o no. La rampa escalonada permite identificar *en qué punto* se degrada: si la latencia p(95) se mantiene con 50 usuarios y se dispara con 100, se conoce el límite operativo y se puede dimensionar la infraestructura con evidencia. La rampa de bajada final verifica además que el sistema **se recupera** tras el peak y no queda degradado.
+#### Resultados obtenidos
 
-**Por qué `sleep(1)`.** Sin think time se simularía un ataque, no usuarios reales. Un usuario real pausa entre acciones; omitir esa pausa produce números pesimistas que llevan a sobredimensionar la infraestructura.
+Ejecución del 26-08-2026 contra `http://localhost:8080/auth/login`, duración 2 min 30 s:
 
-**Salida de la ejecución:**
+| Indicador | Resultado | Umbral (SLO) | Estado |
+|---|---|---|---|
+| Peticiones totales | 5.716 | — | — |
+| Throughput (TPS) | 37,99 req/s | > 15 req/s | ✅ Cumple |
+| Latencia mínima | 0,00 ms | — | — |
+| Latencia promedio | 0,32 ms | — | — |
+| Latencia mediana p(50) | 0,50 ms | — | — |
+| Latencia p(90) | 0,60 ms | — | — |
+| **Latencia p(95)** | **0,74 ms** | < 200 ms | ✅ Cumple |
+| **Latencia p(99)** | **1,12 ms** | < 500 ms | ✅ Cumple |
+| Latencia máxima | 5,84 ms | — | — |
+| Tasa de respuestas inesperadas | 0,0000 | < 0,01 | ✅ Cumple |
+| Usuarios virtuales máximos | 100 | — | — |
 
-```
-===========================================
- RESUMEN DE PERFORMANCE - LOGIN
-===========================================
- Throughput (TPS)      : __.__ req/s
- Latencia promedio     : ___.__ ms
- Latencia p(95)        : ___.__ ms
- Latencia p(99)        : ____.__ ms
- Tasa de error         : _.__
- Iteraciones totales   : ____
-===========================================
-```
+Distribución de respuestas: **5.716 logins exitosos (200), cero rechazos de negocio, cero respuestas limitadas por tasa, cero errores de servidor y cero peticiones sin respuesta.**
 
-> 📸 **Captura 14** — Ejecución de `k6 run performance/login-performance.js` con el resumen de métricas y el estado de los umbrales.
+#### Análisis de los indicadores
 
----
+**Throughput (TPS): 37,99 req/s.** El servicio procesó casi 38 transacciones por segundo de forma sostenida. Conviene ser preciso al interpretar este número: **no es la capacidad máxima del servicio**, sino el resultado del perfil de carga aplicado. Con 100 usuarios virtuales y un think time de un segundo, el techo aritmético del experimento está alrededor de 100 peticiones por segundo, y el valor observado refleja la mezcla de las etapas de rampa. El servicio nunca se acercó a su límite.
+
+**Latencia p(95) = 0,74 ms y p(99) = 1,12 ms.** Se observan los percentiles y no el promedio, porque el promedio esconde la cola: un promedio de 300 ms puede convivir con un 5% de usuarios esperando cuatro segundos, y son justamente esos usuarios los que abandonan o reclaman. El p(95) indica que el 95% de las peticiones se resolvió en menos de 0,8 ms y el p(99) que incluso el percentil más castigado se mantuvo por debajo de 1,2 ms. La distancia entre la mediana (0,50 ms) y el máximo (5,84 ms) es de un orden de magnitud, lo que corresponde a los picos normales del recolector de basura de la JVM y no a un patrón de degradación.
+
+**Tasa de respuestas inesperadas: 0,0000.** Ninguna de las 5.716 peticiones devolvió un código fuera del contrato. Este indicador mide **estabilidad**, no velocidad: un servicio que responde rápido pero con error no está sano. Es habitual que bajo carga aparezcan errores 5xx por agotamiento del pool de conexiones o timeouts; aquí no ocurrió ninguno.
+
+**Concurrencia: 100 usuarios virtuales, cero iteraciones interrumpidas.** El servicio atendió el doble de la carga nominal esperada sin degradarse ni perder peticiones.
+
+#### Hallazgo: un defecto que solo la carga podía revelar
+
+Al exponer `ServicioAutenticacion` a peticiones concurrentes se detectó que sus colecciones internas eran `HashMap`, una estructura **no segura para acceso concurrente**. Bajo múltiples hilos un `HashMap` puede perder escrituras y, al redimensionar su tabla interna, dejarla en un estado que provoca un bucle infinito con el consiguiente consumo del 100% de CPU.
+
+Se corrigió sustituyéndolo por `ConcurrentHashMap`.
+
+Lo relevante para la estrategia de pruebas es que **ninguna de las doce pruebas unitarias ni de los seis escenarios BDD podía detectar este defecto**, porque todos se ejecutan en un solo hilo. Un defecto de concurrencia no es un caso de borde que se olvidó cubrir: es una clase de fallo estructuralmente invisible para las pruebas funcionales, que solo se manifiesta bajo carga real. Es el argumento más concreto de por qué la prueba de performance no es un complemento opcional de la estrategia, sino una capa que cubre riesgos que las demás no alcanzan.
+
+#### Limitación reconocida y siguiente experimento
+
+Los umbrales se cumplieron con un margen amplísimo —el p(95) quedó 270 veces por debajo del límite— lo que confirma que el servicio soporta con holgura la carga esperada, pero **también significa que la prueba no encontró el punto de saturación**. Se sabe que el servicio aguanta 100 usuarios concurrentes; no se sabe cuántos aguanta.
+
+Reportar este resultado como "el servicio tiene excelente performance" sería una conclusión más fuerte que la evidencia. Lo correcto es afirmar lo que se midió: *bajo la carga esperada, el servicio responde dentro de los SLO definidos.*
+
+El siguiente experimento, para caracterizar la capacidad real, consiste en eliminar el think time y escalar los usuarios virtuales hasta que la latencia p(95) cruce el umbral o aparezcan errores. Ese punto de quiebre es el dato que permite dimensionar infraestructura y definir a partir de qué volumen de usuarios el sistema necesita escalar.
+
+#### Conclusión de la sección
+
+La prueba cumplió sus dos funciones. Verificó que el login sostiene el doble de la carga esperada dentro de los umbrales definidos, y —de forma menos esperada pero más valiosa— reveló un defecto de concurrencia invisible para el resto de la suite. También dejó una lección metodológica: una prueba de carga mal dirigida no falla de forma evidente, entrega números plausibles. Validar *qué* se está midiendo es tan importante como medirlo.
+
+> 📸 **CAPTURA 14** — Ejecución de k6 con el resumen de métricas y el estado de cada umbral.
+
 
 ### 3.7 Dashboard de métricas del pipeline
 
@@ -1076,6 +1135,33 @@ Escenario: "Bloqueo de la cuenta tras tres intentos fallidos"
 
 La alerta contiene lo necesario para diagnosticar **sin abrir el repositorio**: qué escenario falló, qué se esperaba, qué ocurrió y un enlace directo al reporte completo.
 
+#### Hallazgo: una alerta que fallaba en silencio
+
+Durante la puesta en marcha se detectó un defecto en la propia definición del pipeline. Los pasos de notificación evaluaban la condición `env.SLACK_WEBHOOK_URL != ''` mientras la variable se declaraba en el bloque `env` **de ese mismo paso**:
+
+```yaml
+# INCORRECTO
+- name: Alerta a Slack
+  if: needs.build-and-test.result == 'failure' && env.SLACK_WEBHOOK_URL != ''
+  env:
+    SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+```
+
+GitHub Actions evalúa la condición `if` de un paso **antes** de aplicar su bloque `env`. La comprobación leía por tanto una variable que aún no existía, obtenía siempre cadena vacía, y las alertas nunca se habrían disparado — ni siquiera con el secret correctamente configurado. La corrección fue declarar la variable a nivel de job, donde ya está disponible cuando se evalúan las condiciones de los pasos:
+
+```yaml
+# CORRECTO
+jobs:
+  reportes-y-alertas:
+    env:
+      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+    steps:
+      - name: Alerta a Slack
+        if: needs.build-and-test.result == 'failure' && env.SLACK_WEBHOOK_URL != ''
+```
+
+El caso ilustra un riesgo propio de los mecanismos de alerta, distinto del de las pruebas. Una prueba mal escrita falla de forma visible y alguien la corrige. **Una alerta mal configurada falla en silencio**: el pipeline se ve verde, nadie recibe notificaciones, y el equipo opera con una falsa sensación de cobertura que solo se descubre el día en que la alerta debía haber sonado. Por eso las alertas deben probarse deliberadamente —forzando la condición que las dispara— y no darse por funcionales porque el YAML sea sintácticamente válido.
+
 #### Decisiones de configuración
 
 | Decisión | Fundamento |
@@ -1099,11 +1185,15 @@ La alerta contiene lo necesario para diagnosticar **sin abrir el repositorio**: 
 
 **3. El mayor valor del BDD ocurre antes de escribir código.** Tres de los seis criterios de aceptación (mensaje genérico por seguridad, validación previa sin consumir intentos, reinicio del contador) no existían en el requerimiento original: surgieron de las preguntas hechas en la sesión Three Amigos. El archivo `.feature` es el resultado visible; la conversación fue el verdadero producto.
 
-**4. Las pruebas funcionales y las de performance responden preguntas distintas.** Las funcionales responden *"¿hace lo correcto?"*; las de performance, *"¿lo sigue haciendo cuando lo usan cien personas a la vez?"*. La ejecución simulada #44 —todo verde en lo funcional, latencia casi duplicada— muestra que una estrategia de pruebas sin la segunda pregunta tiene un punto ciego que solo se descubre en producción.
+**4. Hay defectos que ninguna prueba funcional puede encontrar.** Al exponer `ServicioAutenticacion` a 100 usuarios concurrentes se descubrió que usaba `HashMap`, una estructura no segura bajo múltiples hilos: puede perder escrituras y, al redimensionarse, entrar en un bucle infinito. Ninguna de las doce pruebas unitarias ni de los seis escenarios BDD podía detectarlo, porque todos se ejecutan en un solo hilo. No es un caso de borde que se olvidó cubrir: es una clase de fallo estructuralmente invisible para las pruebas funcionales. Ese es el argumento más concreto de por qué la prueba de performance no es un complemento opcional de la estrategia, sino una capa que cubre riesgos que las demás no alcanzan.
 
-**5. La visibilidad convierte los datos en decisiones.** Reportes que nadie abre no mejoran la calidad. Publicarlos en tres vías —resumen en el commit, artefactos descargables y una URL permanente— junto a alertas que llegan al canal de trabajo es lo que cierra el ciclo entre *medir* y *actuar*.
+**5. Una medición sin validar es peor que no medir.** La primera versión de la prueba de carga apuntaba a una API pública y entregó "1,76 ms de latencia promedio": una cifra excelente, plausible, y completamente falsa — medía la velocidad con que un CDN rechazaba el tráfico. A diferencia de una prueba funcional, que falla de forma visible, una prueba de carga mal dirigida produce números que nadie cuestiona. Validar *qué* se está midiendo resultó tan importante como medirlo.
 
-**6. Articulación de ambas unidades.** Los conceptos de la Unidad I (estrategias de prueba en ambientes de desarrollo, atomicidad con alta cohesión y bajo acoplamiento, selección del test adecuado, equipo de test y desarrollo) no son teoría previa a la automatización: son la condición que hace que la automatización de la Unidad II rinda. Un pipeline que ejecuta pruebas acopladas y lentas se vuelve un cuello de botella que el equipo termina desactivando.
+**6. Los mecanismos de alerta fallan en silencio.** El defecto en la condición `if` de los pasos de notificación habría dejado al equipo sin alertas mientras el pipeline se veía perfectamente verde. Una cobertura que se cree tener y no se tiene es más peligrosa que la ausencia reconocida de cobertura, porque elimina la vigilancia sin eliminar el riesgo.
+
+**7. La visibilidad convierte los datos en decisiones.** Reportes que nadie abre no mejoran la calidad. Publicarlos en tres vías —resumen en el commit, artefactos descargables y una URL permanente— junto a alertas que llegan al canal de trabajo es lo que cierra el ciclo entre *medir* y *actuar*.
+
+**8. Articulación de ambas unidades.** Los conceptos de la Unidad I (estrategias de prueba en ambientes de desarrollo, atomicidad con alta cohesión y bajo acoplamiento, selección del test adecuado, equipo de test y desarrollo) no son teoría previa a la automatización: son la condición que hace que la automatización de la Unidad II rinda. Un pipeline que ejecuta pruebas acopladas y lentas se vuelve un cuello de botella que el equipo termina desactivando.
 
 ---
 
@@ -1111,15 +1201,15 @@ La alerta contiene lo necesario para diagnosticar **sin abrir el repositorio**: 
 
 | # | Indicador de logro | Pts | Dónde se evidencia |
 |---|---|---|---|
-| 1 | Implementación de integración continua y pipeline automático | 15 | §2.5 — `ci.yml` con 3 jobs, disparadores en push/PR/cron, caché y control de concurrencia |
-| 2 | Estructura y atomicidad de la suite de pruebas | 10 | §2.3 y §2.4 — 12 pruebas atómicas, `@BeforeEach`, clases sin estado, estructura Maven separando `unit/` y `bdd/` |
-| 3 | Calidad y documentación de commits y gestión de versiones | 10 | §2.1 — 13 commits con Conventional Commits, 4 ramas feature, merges `--no-ff`, historial en grafo |
-| 4 | Configuración y evidencia de reporte navegable | 10 | §2.6 — Surefire HTML, test-reporter en el commit, artefactos y GitHub Pages |
-| 5 | Correcta definición y automatización de escenarios BDD | 10 | §3.2 y §3.3 — 6 escenarios Gherkin con `Esquema del escenario` + `Ejemplos`, step definitions y runner |
-| 6 | Simulación de trabajo colaborativo y claridad de criterios | 10 | §3.1 — Sesión Three Amigos con roles, transcripción y 6 criterios de aceptación |
-| 7 | Prueba de performance y análisis de indicadores | 10 | §3.6 — Script k6 con carga escalonada, umbrales SLO y análisis de TPS, p(95), p(99) y tasa de error |
-| 8 | Visualización de métricas y reporting en dashboards | 10 | §3.7 — Flujo de datos, métricas expuestas, GitHub Pages y ruta a Grafana/InfluxDB |
-| 9 | Propuesta y simulación de alertas automáticas | 10 | §3.8 — Matriz de 6 alertas, implementación en YAML y ejemplo de alerta recibida |
+| 1 | Implementación de integración continua y pipeline automático | 15 | §2.5 — `ci.yml` con 3 jobs encadenados, disparadores en push/PR/cron, permisos mínimos explícitos, caché y control de concurrencia. Ejecutado en GitHub Actions |
+| 2 | Estructura y atomicidad de la suite de pruebas | 10 | §2.3 y §2.4 — 12 pruebas atómicas en 127 ms, `@BeforeEach`, clases sin estado, estructura Maven separando `unit/`, `bdd/` y `app/` |
+| 3 | Calidad y documentación de commits y gestión de versiones | 10 | §2.1 — 22 commits con Conventional Commits, 4 ramas feature, merges `--no-ff`, `.gitattributes` para normalizar fin de línea |
+| 4 | Configuración y evidencia de reporte navegable | 10 | §2.6 — Surefire HTML, test-reporter en el commit, artefactos descargables y GitHub Pages |
+| 5 | Correcta definición y automatización de escenarios BDD | 10 | §3.2 y §3.3 — 6 escenarios Gherkin con `Esquema del escenario` + `Ejemplos`, step definitions y runner con 3 formatos de reporte |
+| 6 | Simulación de trabajo colaborativo y claridad de criterios | 10 | §3.1 — Sesión Three Amigos con roles, transcripción y 6 criterios de aceptación, tres de ellos emergentes de la conversación |
+| 7 | Prueba de performance y análisis de indicadores | 10 | §3.6 — 5.716 peticiones con 100 VUs contra la propia aplicación, p(95) 0,74 ms, análisis de TPS/latencia/estabilidad y hallazgo de concurrencia |
+| 8 | Visualización de métricas y reporting en dashboards | 10 | §3.7 — Flujo de datos, métricas en el resumen de la ejecución, GitHub Pages y ruta a Grafana/InfluxDB |
+| 9 | Propuesta y simulación de alertas automáticas | 10 | §3.8 — Matriz de 6 alertas, implementación en YAML, ejemplo de mensaje y corrección de un fallo silencioso en la condición |
 | 10 | Documentación completa y claridad del README.md | 10 | `README.md` — objetivos, estructura, archivos clave, comandos, reportes y explicación del pipeline |
 | | **Total** | **100** | |
 

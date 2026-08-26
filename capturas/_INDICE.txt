@@ -1,6 +1,6 @@
 ﻿================================================================================
   INDICE DE EVIDENCIAS - Taller 1, Unidad II
-  Generado el 25-08-2026 14:48
+  Generado el 26-08-2026 00:59
 ================================================================================
 
 ARCHIVOS .TXT GENERADOS POR ESTE SCRIPT (captura desde el Bloc de notas)

@@ -2,7 +2,7 @@
   CAPTURA 02 - Ramas del repositorio y detalle de cada commit
 ================================================================================
   Comando ejecutado : git branch -a && echo. && git log --date=short --format=%h%x20%ad%x20%an%x20%s
-  Fecha y hora      : 25-08-2026 14:44:58
+  Fecha y hora      : 26-08-2026 00:56:24
   Equipo            : SUAREZJARA-PC
   Usuario           : Douglas Suárez Z
   Directorio        : C:\dev\qa-automation-ci
@@ -14,7 +14,14 @@
   feature/pipeline-ci
   feature/pruebas-unitarias
 * main
+  remotes/origin/HEAD -> origin/main
+  remotes/origin/main
  
+53e82ec 2026-08-25 Douglas Suarez fix(ci): declara el webhook a nivel de job para que la condicion pueda leerlo
+3e997eb 2026-08-25 Douglas Suarez ci: distingue degradacion de performance de fallo de la herramienta
+31a90f6 2026-08-25 Douglas Suarez chore: agrega scripts de generacion de evidencias y publicacion
+b07afbc 2026-08-25 Douglas Suarez chore: normaliza fin de linea con .gitattributes
+747397d 2026-08-25 Douglas Suarez fix(perf): distingue rechazos de negocio de fallos de red en la prueba k6
 a80ad87 2026-08-24 Douglas Suarez docs: incorpora informe del taller al repositorio
 fbe9a09 2026-08-18 Douglas Suarez docs: agrega historial de versionado como evidencia
 0afa99c 2026-08-18 Douglas Suarez docs: documenta objetivos, estructura, comandos y pipeline en README

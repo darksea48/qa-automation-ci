@@ -1,7 +1,7 @@
 package cl.iplacex.qa.auth;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Servicio de autenticación simulado (funcionalidad "Login" definida en la
@@ -18,9 +18,19 @@ public class ServicioAutenticacion {
 
     private static final int MAX_INTENTOS = 3;
 
-    /** Repositorio de usuarios en memoria: mantiene la prueba rápida y sin dependencias externas. */
-    private final Map<String, String> usuarios = new HashMap<>();
-    private final Map<String, Integer> intentosFallidos = new HashMap<>();
+    /**
+     * Repositorio de usuarios en memoria: mantiene la prueba rápida y sin
+     * dependencias externas.
+     *
+     * Se usan colecciones CONCURRENTES porque la prueba de carga expone este
+     * mismo servicio a 100 hilos simultáneos. Un HashMap corriente no es seguro
+     * bajo concurrencia: puede perder escrituras o, al redimensionarse, dejar
+     * su tabla interna en un estado que provoca un bucle infinito. Es
+     * exactamente el tipo de defecto que las pruebas unitarias (de un solo
+     * hilo) nunca detectan y que solo aparece bajo carga.
+     */
+    private final Map<String, String> usuarios = new ConcurrentHashMap<>();
+    private final Map<String, Integer> intentosFallidos = new ConcurrentHashMap<>();
 
     public ServicioAutenticacion() {
         usuarios.put("douglas", "Clave123");

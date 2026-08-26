@@ -2,7 +2,7 @@
   CAPTURA 07 - Ejecucion local de toda la suite (18 pruebas)
 ================================================================================
   Comando ejecutado : mvn -B clean test
-  Fecha y hora      : 25-08-2026 14:45:08
+  Fecha y hora      : 26-08-2026 00:56:33
   Equipo            : SUAREZJARA-PC
   Usuario           : Douglas Suárez Z
   Directorio        : C:\dev\qa-automation-ci
@@ -24,7 +24,7 @@
 [INFO] 
 [INFO] --- compiler:3.15.0:compile (default-compile) @ qa-automation-ci ---
 [INFO] Recompiling the module because of changed source code.
-[INFO] Compiling 4 source files with javac [debug target 17] to target\classes
+[INFO] Compiling 5 source files with javac [debug target 17] to target\classes
 [INFO] 
 [INFO] --- resources:3.4.0:testResources (default-testResources) @ qa-automation-ci ---
 [INFO] Copying 1 resource from src\test\resources to target\test-classes
@@ -40,9 +40,9 @@
 [INFO]  T E S T S
 [INFO] -------------------------------------------------------
 [INFO] Running cl.iplacex.qa.unit.CalculadoraTest
-[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.116 s -- in cl.iplacex.qa.unit.CalculadoraTest
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.101 s -- in cl.iplacex.qa.unit.CalculadoraTest
 [INFO] Running cl.iplacex.qa.unit.ServicioAutenticacionTest
-[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.011 s -- in cl.iplacex.qa.unit.ServicioAutenticacionTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.009 s -- in cl.iplacex.qa.unit.ServicioAutenticacionTest
 [INFO] Running cl.iplacex.qa.bdd.runner.BddTestRunner
 
 @login @smoke @critico
@@ -87,7 +87,7 @@ Escenario: Bloqueo de la cuenta tras tres intentos fallidos                  # f
   Cuando el usuario ingresa el usuario "analista" y la contraseña "Qa2026*"  # cl.iplacex.qa.bdd.steps.LoginSteps.elUsuarioIngresaCredenciales(java.lang.String,java.lang.String)
   Entonces el sistema deniega el acceso                                      # cl.iplacex.qa.bdd.steps.LoginSteps.elSistemaDeniegaElAcceso()
   Y se muestra el mensaje "Cuenta bloqueada por múltiples intentos fallidos" # cl.iplacex.qa.bdd.steps.LoginSteps.seMuestraElMensaje(java.lang.String)
-[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.526 s -- in cl.iplacex.qa.bdd.runner.BddTestRunner
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.457 s -- in cl.iplacex.qa.bdd.runner.BddTestRunner
 [INFO] 
 [INFO] Results:
 [INFO] 
@@ -96,6 +96,6 @@ Escenario: Bloqueo de la cuenta tras tres intentos fallidos                  # f
 [INFO] ------------------------------------------------------------------------
 [INFO] BUILD SUCCESS
 [INFO] ------------------------------------------------------------------------
-[INFO] Total time:  3.999 s
-[INFO] Finished at: 2026-08-25T14:45:08-04:00
+[INFO] Total time:  3.566 s
+[INFO] Finished at: 2026-08-26T00:56:33-04:00
 [INFO] ------------------------------------------------------------------------

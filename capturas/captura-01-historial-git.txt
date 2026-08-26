@@ -2,13 +2,18 @@
   CAPTURA 01 - Historial de commits y ramas (gestion de versiones)
 ================================================================================
   Comando ejecutado : git log --oneline --graph --all
-  Fecha y hora      : 25-08-2026 14:44:58
+  Fecha y hora      : 26-08-2026 00:56:24
   Equipo            : SUAREZJARA-PC
   Usuario           : Douglas Suárez Z
   Directorio        : C:\dev\qa-automation-ci
   Codigo de salida  : 0
 ================================================================================
 
+* 53e82ec fix(ci): declara el webhook a nivel de job para que la condicion pueda leerlo
+* 3e997eb ci: distingue degradacion de performance de fallo de la herramienta
+* 31a90f6 chore: agrega scripts de generacion de evidencias y publicacion
+* b07afbc chore: normaliza fin de linea con .gitattributes
+* 747397d fix(perf): distingue rechazos de negocio de fallos de red en la prueba k6
 * a80ad87 docs: incorpora informe del taller al repositorio
 * fbe9a09 docs: agrega historial de versionado como evidencia
 * 0afa99c docs: documenta objetivos, estructura, comandos y pipeline en README

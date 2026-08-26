@@ -2,7 +2,7 @@
   CAPTURA 11 - Ejecucion de los 6 escenarios BDD en Gherkin
 ================================================================================
   Comando ejecutado : mvn -B test -Dtest=BddTestRunner -DfailIfNoTests=false
-  Fecha y hora      : 25-08-2026 14:45:19
+  Fecha y hora      : 26-08-2026 00:56:43
   Equipo            : SUAREZJARA-PC
   Usuario           : Douglas Suárez Z
   Directorio        : C:\dev\qa-automation-ci
@@ -78,7 +78,7 @@ Escenario: Bloqueo de la cuenta tras tres intentos fallidos                  # f
   Cuando el usuario ingresa el usuario "analista" y la contraseña "Qa2026*"  # cl.iplacex.qa.bdd.steps.LoginSteps.elUsuarioIngresaCredenciales(java.lang.String,java.lang.String)
   Entonces el sistema deniega el acceso                                      # cl.iplacex.qa.bdd.steps.LoginSteps.elSistemaDeniegaElAcceso()
   Y se muestra el mensaje "Cuenta bloqueada por múltiples intentos fallidos" # cl.iplacex.qa.bdd.steps.LoginSteps.seMuestraElMensaje(java.lang.String)
-[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.481 s -- in cl.iplacex.qa.bdd.runner.BddTestRunner
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.498 s -- in cl.iplacex.qa.bdd.runner.BddTestRunner
 [INFO] 
 [INFO] Results:
 [INFO] 
@@ -87,6 +87,6 @@ Escenario: Bloqueo de la cuenta tras tres intentos fallidos                  # f
 [INFO] ------------------------------------------------------------------------
 [INFO] BUILD SUCCESS
 [INFO] ------------------------------------------------------------------------
-[INFO] Total time:  2.468 s
-[INFO] Finished at: 2026-08-25T14:45:19-04:00
+[INFO] Total time:  2.597 s
+[INFO] Finished at: 2026-08-26T00:56:43-04:00
 [INFO] ------------------------------------------------------------------------

@@ -2,193 +2,232 @@
  * ===========================================================================
  *  Prueba de performance - Funcionalidad crítica: LOGIN
  *  Herramienta: k6 (https://k6.io)
- *  Ejecución local : k6 run performance/login-performance.js
- *  Ejecución en CI : k6 run --summary-export=performance/resultados/summary.json ...
+ *
+ *  Requiere que el servidor de la aplicación esté levantado:
+ *      mvn compile
+ *      java -cp target/classes cl.iplacex.qa.app.ServidorLogin
+ *
+ *  Ejecución:
+ *      k6 run performance/login-performance.js
+ *      k6 run --env BASE_URL=http://otro-host:8080 performance/login-performance.js
  * ===========================================================================
  *
- *  ¿Por qué el login? Es la puerta de entrada del sistema: si se degrada,
- *  TODAS las demás funcionalidades quedan inaccesibles. Es el punto de mayor
+ *  ¿POR QUÉ EL LOGIN?
+ *  Es la puerta de entrada del sistema: si se degrada, todas las demás
+ *  funcionalidades quedan inaccesibles. Es además el punto de mayor
  *  concurrencia en la hora peak.
  *
+ *  ¿POR QUÉ CONTRA UN SERVIDOR PROPIO Y NO CONTRA UNA API PÚBLICA?
+ *  Una primera versión de esta prueba apuntaba a una API pública de terceros.
+ *  El resultado fue inválido: el servicio detectó la carga, activó su
+ *  limitador de tasa y devolvió rechazos inmediatos desde su capa de borde.
+ *  Las métricas resultantes (1.76 ms de latencia promedio) medían la velocidad
+ *  de ese rechazo, no el rendimiento del login. Midiendo la propia aplicación
+ *  el resultado es reproducible, no depende de la red y evalúa exactamente el
+ *  mismo componente que cubren las pruebas unitarias y los escenarios BDD.
+ *
  *  INDICADORES MONITOREADOS
- *  ------------------------
- *  1. TPS / throughput (http_reqs)        -> transacciones por segundo que
- *     soporta el endpoint. Mide capacidad.
- *  2. Latencia (http_req_duration)        -> se observa el percentil 95 y 99,
- *     NO el promedio: el promedio esconde la cola de usuarios lentos.
- *  3. Tasa de errores (http_req_failed)   -> % de respuestas inesperadas.
- *     Es el indicador de estabilidad bajo carga.
- *  4. Usuarios virtuales concurrentes (vus)-> carga aplicada en cada momento.
+ *  1. TPS / throughput (http_reqs)      -> capacidad del endpoint
+ *  2. Latencia p(95) y p(99)            -> experiencia del usuario, no el promedio
+ *  3. Tasa de respuestas inesperadas    -> estabilidad bajo carga
+ *  4. Usuarios virtuales concurrentes   -> variable independiente del experimento
  */
- 
+
 import http from 'k6/http';
 import { check, sleep } from 'k6';
 import { Rate, Trend, Counter } from 'k6/metrics';
- 
+
 // ---------------------------------------------------------------------------
-// Métricas personalizadas: permiten analizar el login por separado del resto
-// del tráfico y distinguir tipos de fallo.
+// Métricas personalizadas. Separar los tipos de respuesta permite distinguir un
+// problema de la aplicación de un problema del entorno, algo que una única
+// "tasa de error" agregada esconde.
 // ---------------------------------------------------------------------------
-const erroresLogin     = new Rate('errores_login');       // fallos funcionales
-const latenciaLogin    = new Trend('latencia_login', true);
-const rechazosNegocio  = new Counter('rechazos_negocio');  // 4xx esperados
-const fallosRed        = new Counter('fallos_red');        // status 0 = inalcanzable
- 
+const erroresLogin    = new Rate('errores_login');
+const latenciaLogin   = new Trend('latencia_login', true);
+const loginsExitosos  = new Counter('logins_exitosos');      // 200
+const rechazosNegocio = new Counter('rechazos_negocio');     // 400 / 401 / 423
+const limitadoPorTasa = new Counter('limitado_por_tasa');    // 429 / 403
+const erroresServidor = new Counter('errores_servidor');     // 5xx
+const sinRespuesta    = new Counter('sin_respuesta');        // status 0
+
 /**
- * DECISIÓN CLAVE DE DISEÑO
- * ------------------------
- * Por defecto k6 considera "fallida" toda respuesta con código >= 400. Pero un
- * 400 devuelto ante credenciales inválidas es la respuesta CORRECTA de la
- * aplicación: el servidor funcionó, procesó la petición y rechazó el acceso
- * como corresponde. Contarlo como error de infraestructura confunde dos cosas
- * distintas y hace que el umbral de estabilidad falle siempre.
- *
- * Con setResponseCallback se declara qué códigos se consideran una respuesta
- * sana del servicio. Los rechazos de negocio se contabilizan aparte, en la
- * métrica 'rechazos_negocio'.
+ * Códigos que representan una respuesta SANA del servicio.
+ * Un 401 ante credenciales incorrectas significa que el servidor funcionó y
+ * aplicó su regla de negocio; contarlo como error de infraestructura mezclaría
+ * dos conceptos distintos. Un 429 o un 5xx, en cambio, sí son fallos.
  */
-http.setResponseCallback(http.expectedStatuses(200, 201, 400, 401));
- 
+http.setResponseCallback(http.expectedStatuses(200, 400, 401, 423));
+
 export const options = {
-  // --- Perfil de carga escalonado (ramping) ---
-  // Se sube la carga por etapas para identificar el punto de quiebre,
-  // en lugar de golpear el sistema de una sola vez.
+  // --- Perfil de carga escalonado ---
+  // Subir por etapas permite identificar EN QUÉ NIVEL de carga se degrada el
+  // servicio. Una carga plana solo responde "aguanta o no aguanta".
   stages: [
-    { duration: '30s', target: 10 },  // rampa de subida: calentamiento
-    { duration: '1m',  target: 50 },  // carga nominal esperada en hora peak
+    { duration: '30s', target: 10 },  // calentamiento
+    { duration: '1m',  target: 50 },  // carga nominal de hora peak
     { duration: '30s', target: 100 }, // carga de estrés: 2x lo esperado
-    { duration: '30s', target: 0 },   // rampa de bajada: verifica recuperación
+    { duration: '30s', target: 0 },   // bajada: verifica la recuperación
   ],
- 
+
+  // Por defecto k6 solo calcula p(90) y p(95). El p(99) hay que pedirlo.
+  summaryTrendStats: ['avg', 'min', 'med', 'max', 'p(90)', 'p(95)', 'p(99)'],
+
   // --- Umbrales (SLO) ---
-  // Si no se cumplen, k6 termina con código 99 y el pipeline lo reporta como
-  // degradación. Un umbral incumplido NO es un error del script: es un
-  // hallazgo, y como tal se documenta en el informe.
+  // Calibrados para un servicio local: sin latencia de red, los tiempos
+  // aceptables son mucho menores que contra un servicio remoto.
   thresholds: {
-    'http_req_duration': ['p(95)<800', 'p(99)<1500'], // 95% bajo 800 ms
-    'http_req_failed':   ['rate<0.01'],               // menos de 1% inesperadas
-    'errores_login':     ['rate<0.05'],
-    'http_reqs':         ['rate>15'],                 // al menos 15 TPS
+    'http_req_duration': ['p(95)<200', 'p(99)<500'],
+    'http_req_failed':   ['rate<0.01'],
+    'errores_login':     ['rate<0.01'],
+    'http_reqs':         ['rate>15'],
   },
- 
-  // No aborta la ejecución al primer umbral incumplido: interesa el
-  // comportamiento completo, incluida la rampa de bajada.
+
   thresholdsAbortOnFail: false,
 };
- 
-const BASE_URL = __ENV.BASE_URL || 'https://test-api.k6.io';
- 
+
+const BASE_URL = __ENV.BASE_URL || 'http://localhost:8080';
+
 export default function () {
+  // Se usan credenciales VÁLIDAS a propósito. La prueba de carga mide la
+  // capacidad del camino exitoso, que es el que ejecuta la gran mayoría del
+  // tráfico real y el más costoso de servir. Los caminos de rechazo ya están
+  // cubiertos por las pruebas unitarias y los escenarios BDD, donde se
+  // verifican por comportamiento y no por volumen.
   const payload = JSON.stringify({
     username: 'douglas',
     password: 'Clave123',
   });
- 
+
   const params = {
     headers: { 'Content-Type': 'application/json' },
-    tags: { funcionalidad: 'login' }, // etiqueta para filtrar en el dashboard
+    tags: { funcionalidad: 'login' },
     timeout: '10s',
   };
- 
-  const res = http.post(`${BASE_URL}/auth/token/login/`, payload, params);
- 
-  // status 0 significa que la petición nunca llegó: DNS, firewall o timeout.
-  // Es un problema de entorno, no de la aplicación bajo prueba.
-  if (res.status === 0) {
-    fallosRed.add(1);
-  } else if (res.status >= 400 && res.status < 500) {
-    rechazosNegocio.add(1);
-  }
- 
-  // Validaciones funcionales dentro de la prueba de carga: un servicio que
-  // responde rápido pero con error no está "sano".
+
+  const res = http.post(`${BASE_URL}/auth/login`, payload, params);
+
+  // Clasificación de la respuesta por tipo, no solo por éxito/fallo.
+  if (res.status === 0)                        sinRespuesta.add(1);
+  else if (res.status === 200)                 loginsExitosos.add(1);
+  else if (res.status === 429 || res.status === 403) limitadoPorTasa.add(1);
+  else if (res.status >= 500)                  erroresServidor.add(1);
+  else if (res.status >= 400)                  rechazosNegocio.add(1);
+
   const ok = check(res, {
-    'el servidor respondió (status distinto de 0)': (r) => r.status !== 0,
-    'el código es 2xx o 4xx, no 5xx':               (r) => r.status !== 0 && r.status < 500,
-    'responde en menos de 800 ms':                  (r) => r.timings.duration < 800,
+    'el servidor respondió':                (r) => r.status !== 0,
+    'el login fue exitoso (200)':           (r) => r.status === 200,
+    'responde en menos de 200 ms':          (r) => r.timings.duration < 200,
+    'el cuerpo trae el estado del login':   (r) => r.body && r.body.includes('estado'),
   });
- 
+
   erroresLogin.add(!ok);
   latenciaLogin.add(res.timings.duration);
- 
-  sleep(1); // think time: simula el tiempo real entre acciones de un usuario
+
+  sleep(1); // think time: sin esta pausa se simula un ataque, no usuarios reales
 }
- 
-/**
- * Genera un resumen navegable al final de la ejecución.
- * El JSON alimenta el dashboard del pipeline; el texto va a la consola y
- * es lo que se captura como evidencia.
- */
+
 export function handleSummary(data) {
   return {
     'performance/resultados/summary.json': JSON.stringify(data, null, 2),
     stdout: textSummary(data),
   };
 }
- 
+
 function textSummary(data) {
   const m = data.metrics;
- 
-  const val = (metrica, campo, decimales = 2) =>
+
+  const val = (metrica, campo, dec = 2) =>
     (m[metrica] && m[metrica].values && m[metrica].values[campo] != null)
-      ? m[metrica].values[campo].toFixed(decimales)
+      ? m[metrica].values[campo].toFixed(dec)
       : 'n/d';
- 
+
   const cuenta = (metrica) =>
     (m[metrica] && m[metrica].values && m[metrica].values.count != null)
       ? m[metrica].values.count
       : 0;
- 
-  const totalPeticiones = cuenta('http_reqs');
-  const sinRed          = cuenta('fallos_red');
-  const rechazos        = cuenta('rechazos_negocio');
- 
-  // Diagnóstico automático: distingue un problema de red de un hallazgo real
+
+  const total      = cuenta('http_reqs');
+  const exitosos   = cuenta('logins_exitosos');
+  const rechazos   = cuenta('rechazos_negocio');
+  const limitados  = cuenta('limitado_por_tasa');
+  const erroresSrv = cuenta('errores_servidor');
+  const sinResp    = cuenta('sin_respuesta');
+
+  const p95 = m['http_req_duration'] ? m['http_req_duration'].values['p(95)'] : null;
+  const p99 = m['http_req_duration'] ? m['http_req_duration'].values['p(99)'] : null;
+
+  // ---- Diagnóstico automático -------------------------------------------
+  // Mira la DISTRIBUCIÓN de códigos, no solo el conteo agregado: es lo que
+  // permite distinguir una degradación real de un problema de entorno.
   let diagnostico;
-  if (totalPeticiones === 0) {
+  if (total === 0) {
     diagnostico =
-      ' DIAGNOSTICO: no se ejecutó ninguna petición. Revisa la instalación de k6.';
-  } else if (sinRed >= totalPeticiones * 0.9) {
+      ' El servidor no recibió ninguna petición. Verifica que ServidorLogin\n' +
+      ' esté levantado en ' + BASE_URL + ' antes de ejecutar k6.';
+  } else if (sinResp >= total * 0.5) {
     diagnostico =
-      ' DIAGNOSTICO: el ' + Math.round((sinRed / totalPeticiones) * 100) + '% de las\n' +
-      ' peticiones no alcanzó el servidor (status 0). El endpoint público no es\n' +
-      ' accesible desde esta red (firewall o proxy corporativo). El diseño de la\n' +
-      ' prueba es válido; lo que falta es salida a internet hacia el destino.';
-  } else if (rechazos >= totalPeticiones * 0.9) {
+      ' El ' + Math.round((sinResp / total) * 100) + '% de las peticiones no obtuvo respuesta.\n' +
+      ' El servidor no está escuchando, se cayó durante la prueba, o un firewall\n' +
+      ' bloquea el puerto. La medición NO es válida.';
+  } else if (limitados >= total * 0.1) {
     diagnostico =
-      ' DIAGNOSTICO: el servidor respondió correctamente a todas las peticiones,\n' +
-      ' rechazando las credenciales de prueba (4xx). Eso es una respuesta sana del\n' +
-      ' servicio: las métricas de latencia y throughput son válidas.';
+      ' El ' + Math.round((limitados / total) * 100) + '% de las peticiones fue limitada por tasa (429/403).\n' +
+      ' Un intermediario está rechazando el tráfico antes de que llegue a la\n' +
+      ' aplicación. Lo medido es la velocidad de ese rechazo, no el rendimiento\n' +
+      ' del login. La medición NO es válida.';
+  } else if (erroresSrv > 0) {
+    diagnostico =
+      ' Se registraron ' + erroresSrv + ' errores 5xx: la aplicación falló bajo carga.\n' +
+      ' Es un hallazgo de estabilidad y debe investigarse antes que la latencia.';
+  } else if (exitosos >= total * 0.95) {
+    const veredicto = (p95 != null && p95 < 200)
+      ? ' Los umbrales de latencia se cumplieron: el servicio soportó la carga.'
+      : ' La latencia p(95) supero el umbral de 200 ms: se identifico el punto de\n' +
+        ' saturacion del servicio bajo la carga aplicada. Es un HALLAZGO valido.';
+    diagnostico =
+      ' El ' + Math.round((exitosos / total) * 100) + '% de los logins fue exitoso contra la aplicación real.\n' +
+      ' Las métricas de latencia y throughput son válidas.\n' + veredicto;
   } else {
-    diagnostico = ' DIAGNOSTICO: ejecución normal.';
+    diagnostico =
+      ' Distribución mixta de respuestas: ' + exitosos + ' exitosas, ' + rechazos + ' rechazos de\n' +
+      ' negocio, ' + limitados + ' limitadas. Revisa la configuración de la prueba.';
   }
- 
+
   return `
 ================================================================================
  RESUMEN DE PERFORMANCE - FUNCIONALIDAD LOGIN
+ Objetivo medido: ${BASE_URL}/auth/login
 ================================================================================
- Peticiones totales      : ${totalPeticiones}
- Throughput (TPS)        : ${val('http_reqs', 'rate')} req/s
+ Peticiones totales        : ${total}
+ Throughput (TPS)          : ${val('http_reqs', 'rate')} req/s
+ Usuarios virtuales máx.   : ${val('vus_max', 'value', 0)}
+ Iteraciones completadas   : ${cuenta('iterations')}
 --------------------------------------------------------------------------------
- Latencia promedio       : ${val('http_req_duration', 'avg')} ms
- Latencia mediana p(50)  : ${val('http_req_duration', 'med')} ms
- Latencia p(95)          : ${val('http_req_duration', 'p(95)')} ms
- Latencia p(99)          : ${val('http_req_duration', 'p(99)')} ms
- Latencia máxima         : ${val('http_req_duration', 'max')} ms
+ LATENCIA
+   Mínima                  : ${val('http_req_duration', 'min')} ms
+   Promedio                : ${val('http_req_duration', 'avg')} ms
+   Mediana p(50)           : ${val('http_req_duration', 'med')} ms
+   p(90)                   : ${val('http_req_duration', 'p(90)')} ms
+   p(95)                   : ${val('http_req_duration', 'p(95)')} ms   [umbral: < 200 ms]
+   p(99)                   : ${val('http_req_duration', 'p(99)')} ms   [umbral: < 500 ms]
+   Máxima                  : ${val('http_req_duration', 'max')} ms
+--------------------------------------------------------------------------------
+ DISTRIBUCION DE RESPUESTAS
+   Logins exitosos (200)   : ${exitosos}
+   Rechazos de negocio     : ${rechazos}   (4xx: respuesta correcta del servidor)
+   Limitadas por tasa      : ${limitados}   (429/403: rechazo de un intermediario)
+   Errores del servidor    : ${erroresSrv}   (5xx: fallo de la aplicacion)
+   Sin respuesta           : ${sinResp}   (status 0: red, puerto o caida)
 --------------------------------------------------------------------------------
  Tasa de respuestas
-   inesperadas           : ${val('http_req_failed', 'rate', 4)}
- Rechazos de negocio 4xx : ${rechazos}   (respuesta correcta del servidor)
- Peticiones sin respuesta: ${sinRed}   (status 0 - red o firewall)
- Usuarios virtuales máx. : ${val('vus_max', 'value', 0)}
- Iteraciones completadas : ${cuenta('iterations')}
+   inesperadas             : ${val('http_req_failed', 'rate', 4)}   [umbral: < 0.01]
 ================================================================================
+ DIAGNOSTICO
 ${diagnostico}
 ================================================================================
- NOTA: un umbral incumplido hace que k6 termine con código 99. Eso NO es un
- error de ejecución: es el resultado de la prueba, y como tal se analiza en el
- informe (¿en qué nivel de carga se degradó? ¿latencia o estabilidad?).
+ NOTA: un umbral incumplido hace que k6 termine con codigo 99. Eso NO es un
+ error de ejecucion: es el resultado de la prueba, y como tal se analiza en el
+ informe (¿en que nivel de carga se degrado? ¿latencia o estabilidad?).
 ================================================================================
 `;
 }
- 

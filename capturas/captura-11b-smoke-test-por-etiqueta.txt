@@ -2,7 +2,7 @@
   CAPTURA 11b - Ejecucion selectiva del smoke test con la etiqueta @smoke
 ================================================================================
   Comando ejecutado : mvn -B test -Dtest=BddTestRunner -Dcucumber.filter.tags=@smoke
-  Fecha y hora      : 25-08-2026 14:45:23
+  Fecha y hora      : 26-08-2026 00:56:48
   Equipo            : SUAREZJARA-PC
   Usuario           : Douglas Suárez Z
   Directorio        : C:\dev\qa-automation-ci
@@ -42,7 +42,7 @@ Escenario: Ingreso exitoso con credenciales válidas                         # f
   Cuando el usuario ingresa el usuario "douglas" y la contraseña "Clave123" # cl.iplacex.qa.bdd.steps.LoginSteps.elUsuarioIngresaCredenciales(java.lang.String,java.lang.String)
   Entonces el sistema concede el acceso                                     # cl.iplacex.qa.bdd.steps.LoginSteps.elSistemaConcedeElAcceso()
   Y se muestra el mensaje "Bienvenido douglas"                              # cl.iplacex.qa.bdd.steps.LoginSteps.seMuestraElMensaje(java.lang.String)
-[WARNING] Tests run: 6, Failures: 0, Errors: 0, Skipped: 5, Time elapsed: 0.499 s -- in cl.iplacex.qa.bdd.runner.BddTestRunner
+[WARNING] Tests run: 6, Failures: 0, Errors: 0, Skipped: 5, Time elapsed: 0.463 s -- in cl.iplacex.qa.bdd.runner.BddTestRunner
 [INFO] 
 [INFO] Results:
 [INFO] 
@@ -51,6 +51,6 @@ Escenario: Ingreso exitoso con credenciales válidas                         # f
 [INFO] ------------------------------------------------------------------------
 [INFO] BUILD SUCCESS
 [INFO] ------------------------------------------------------------------------
-[INFO] Total time:  2.537 s
-[INFO] Finished at: 2026-08-25T14:45:23-04:00
+[INFO] Total time:  2.646 s
+[INFO] Finished at: 2026-08-26T00:56:48-04:00
 [INFO] ------------------------------------------------------------------------

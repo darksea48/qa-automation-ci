@@ -1,0 +1,53 @@
+﻿================================================================================
+  CAPTURA 14 - Prueba de carga sobre el login (TPS, latencia p95/p99, errores)
+================================================================================
+  Comando ejecutado : k6 run performance\login-performance.js
+  Fecha y hora      : 26-08-2026 00:59:23
+  Equipo            : SUAREZJARA-PC
+  Usuario           : Douglas Suárez Z
+  Directorio        : C:\dev\qa-automation-ci
+  Codigo de salida  : 0
+================================================================================
+
+   [ ... 468 lineas de progreso de k6 omitidas ... ]
+
+================================================================================
+ RESUMEN DE PERFORMANCE - FUNCIONALIDAD LOGIN
+ Objetivo medido: http://localhost:8080/auth/login
+================================================================================
+ Peticiones totales        : 5716
+ Throughput (TPS)          : 37.99 req/s
+ Usuarios virtuales máx.   : 100
+ Iteraciones completadas   : 5716
+--------------------------------------------------------------------------------
+ LATENCIA
+   Mínima                  : 0.00 ms
+   Promedio                : 0.32 ms
+   Mediana p(50)           : 0.50 ms
+   p(90)                   : 0.60 ms
+   p(95)                   : 0.74 ms   [umbral: < 200 ms]
+   p(99)                   : 1.12 ms   [umbral: < 500 ms]
+   Máxima                  : 5.84 ms
+--------------------------------------------------------------------------------
+ DISTRIBUCION DE RESPUESTAS
+   Logins exitosos (200)   : 5716
+   Rechazos de negocio     : 0   (4xx: respuesta correcta del servidor)
+   Limitadas por tasa      : 0   (429/403: rechazo de un intermediario)
+   Errores del servidor    : 0   (5xx: fallo de la aplicacion)
+   Sin respuesta           : 0   (status 0: red, puerto o caida)
+--------------------------------------------------------------------------------
+ Tasa de respuestas
+   inesperadas             : 0.0000   [umbral: < 0.01]
+================================================================================
+ DIAGNOSTICO
+ El 100% de los logins fue exitoso contra la aplicación real.
+ Las métricas de latencia y throughput son válidas.
+ Los umbrales de latencia se cumplieron: el servicio soportó la carga.
+================================================================================
+ NOTA: un umbral incumplido hace que k6 termine con codigo 99. Eso NO es un
+ error de ejecucion: es el resultado de la prueba, y como tal se analiza en el
+ informe (¿en que nivel de carga se degrado? ¿latencia o estabilidad?).
+================================================================================
+
+running (2m30.5s), 000/100 VUs, 5716 complete and 0 interrupted iterations
+default ✓ [ 100% ] 000/100 VUs  2m30s

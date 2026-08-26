@@ -2,44 +2,44 @@
 ================================================================================
   capturar-evidencias.ps1
   Taller 1 - Evaluación Unidad II - Automatización de Pruebas (ADP1323)
- 
+
   Ejecuta cada prueba del proyecto y guarda su salida en un archivo de texto
   numerado según la captura que le corresponde en el informe. Cada archivo se
   abre en el Bloc de notas para que lo captures con Win+Shift+S y lo pegues
   directamente en el documento Word.
- 
+
   USO:
       cd C:\dev\qa-automation-ci
       powershell -ExecutionPolicy Bypass -File .\capturar-evidencias.ps1
- 
+
   OPCIONES:
       -SinNotepad      Genera los archivos sin abrir el Bloc de notas
       -Solo "07"       Genera únicamente esa captura (ej: "01", "09", "11b")
 ================================================================================
 #>
- 
+
 param(
     [switch]$SinNotepad,
     [string]$Solo = ""
 )
- 
+
 # ------------------------------------------------------------------ preparación
 chcp 65001 > $null
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
- 
+
 $raiz    = $PSScriptRoot
 $destino = Join-Path $raiz "capturas"
 New-Item -ItemType Directory -Force -Path $destino | Out-Null
- 
+
 function Toca($id) { return ($script:Solo -eq "" -or $script:Solo -eq $id) }
- 
+
 Write-Host ""
 Write-Host "================================================================" -ForegroundColor Cyan
 Write-Host "  GENERADOR DE EVIDENCIAS - Taller 1, Unidad II" -ForegroundColor Cyan
 Write-Host "  Destino: $destino" -ForegroundColor Cyan
 Write-Host "================================================================" -ForegroundColor Cyan
 Write-Host ""
- 
+
 # -------------------------------------------------------------------- función base
 function Grabar {
     param(
@@ -50,19 +50,19 @@ function Grabar {
         [switch]$SeEsperaFallo, # true cuando el build DEBE fallar
         [switch]$EsK6           # k6 devuelve 99 cuando un umbral no se cumple
     )
- 
+
     if (-not (Toca $Id)) { return }
- 
+
     $archivo = Join-Path $destino "captura-$Id-$Nombre.txt"
- 
+
     Write-Host "[$Id] $Titulo" -ForegroundColor Yellow
     Write-Host "     > $Comando" -ForegroundColor DarkGray
- 
+
     # cmd /c fusiona stderr en stdout y evita que PowerShell convierta las líneas
     # de error en objetos ErrorRecord (que saldrían en rojo y desordenados).
     $salida = cmd /c "$Comando 2>&1"
     $codigo = $LASTEXITCODE
- 
+
     $encabezado = @(
         "================================================================================",
         "  CAPTURA $Id - $Titulo",
@@ -76,9 +76,9 @@ function Grabar {
         "================================================================================",
         ""
     )
- 
+
     ($encabezado + $salida) | Out-File -FilePath $archivo -Encoding utf8
- 
+
     if ($SeEsperaFallo) {
         if ($codigo -ne 0) {
             Write-Host "     OK - el build fallo como se esperaba (codigo $codigo)" -ForegroundColor Green
@@ -96,17 +96,17 @@ function Grabar {
         Write-Host "     ATENCION - termino con codigo $codigo. Revisa el archivo." -ForegroundColor Red
     }
     Write-Host ""
- 
+
     if (-not $SinNotepad) { Start-Process notepad.exe $archivo }
 }
- 
+
 # ============================================================================
 #  CAPTURA 01 - Historial de versionado
 # ============================================================================
 Grabar -Id "01" -Nombre "historial-git" `
        -Titulo "Historial de commits y ramas (gestion de versiones)" `
        -Comando "git log --oneline --graph --all"
- 
+
 # ============================================================================
 #  CAPTURA 02 - Ramas del repositorio y detalle de commits
 # ============================================================================
@@ -115,39 +115,39 @@ Grabar -Id "01" -Nombre "historial-git" `
 Grabar -Id "02" -Nombre "ramas-git" `
        -Titulo "Ramas del repositorio y detalle de cada commit" `
        -Comando "git branch -a && echo. && git log --date=short --format=%h%x20%ad%x20%an%x20%s"
- 
+
 # ============================================================================
 #  CAPTURA 03 - Dependencias resueltas por Maven
 # ============================================================================
 Grabar -Id "03" -Nombre "dependencias-maven" `
        -Titulo "Arbol de dependencias (JUnit 5 y Cucumber resueltos)" `
        -Comando "mvn -B dependency:tree"
- 
+
 # ============================================================================
 #  CAPTURA 07 - Ejecución local completa de la suite
 # ============================================================================
 Grabar -Id "07" -Nombre "ejecucion-local-completa" `
        -Titulo "Ejecucion local de toda la suite (18 pruebas)" `
        -Comando "mvn -B clean test"
- 
+
 # ============================================================================
 #  CAPTURA 09 - Fallo intencional: la puerta de calidad detiene el build.
 #  El script modifica la asercion, ejecuta, y RESTAURA el archivo original.
 # ============================================================================
 if (Toca "09") {
- 
+
     $testFile = Join-Path $raiz "src\test\java\cl\iplacex\qa\unit\CalculadoraTest.java"
     $respaldo = "$testFile.bak"
- 
+
     if (Test-Path $testFile) {
         Write-Host "[09] Fallo intencional (puerta de calidad)" -ForegroundColor Yellow
         Write-Host "     Se modifica CalculadoraTest.java y se restaura al terminar." -ForegroundColor DarkGray
- 
+
         Copy-Item $testFile $respaldo -Force
         try {
             $contenido  = Get-Content $testFile -Raw -Encoding UTF8
             $modificado = $contenido -replace 'assertEquals\(12, resultado', 'assertEquals(99, resultado'
- 
+
             if ($modificado -eq $contenido) {
                 Write-Host "     ATENCION - no se encontro la asercion a modificar. Se omite." -ForegroundColor Red
             } else {
@@ -168,47 +168,104 @@ if (Toca "09") {
         }
     }
 }
- 
+
 # ============================================================================
 #  CAPTURA 11 - Escenarios BDD (Cucumber)
 # ============================================================================
 Grabar -Id "11" -Nombre "escenarios-bdd" `
        -Titulo "Ejecucion de los 6 escenarios BDD en Gherkin" `
        -Comando "mvn -B test -Dtest=BddTestRunner -DfailIfNoTests=false"
- 
+
 # ============================================================================
 #  CAPTURA 11b - Ejecución selectiva por etiqueta (complementaria, opcional)
 # ============================================================================
 Grabar -Id "11b" -Nombre "smoke-test-por-etiqueta" `
        -Titulo "Ejecucion selectiva del smoke test con la etiqueta @smoke" `
        -Comando "mvn -B test -Dtest=BddTestRunner -Dcucumber.filter.tags=@smoke"
- 
+
 # ============================================================================
 #  CAPTURA 14 - Prueba de performance con k6 (si esta instalado)
 # ============================================================================
 if (Toca "14") {
-    if (Get-Command k6 -ErrorAction SilentlyContinue) {
-        New-Item -ItemType Directory -Force -Path (Join-Path $raiz "performance\resultados") | Out-Null
-        Grabar -Id "14" -Nombre "performance-k6" `
-               -Titulo "Prueba de carga sobre el login (TPS, latencia p95/p99, errores)" `
-               -Comando "k6 run performance\login-performance.js" -EsK6
-    } else {
+    if (-not (Get-Command k6 -ErrorAction SilentlyContinue)) {
         Write-Host "[14] k6 no esta instalado - se omite la prueba de performance." -ForegroundColor DarkYellow
         Write-Host "     Para instalarlo:  winget install k6" -ForegroundColor DarkGray
         Write-Host ""
+    } else {
+        New-Item -ItemType Directory -Force -Path (Join-Path $raiz "performance\resultados") | Out-Null
+
+        # --- Compilar la aplicacion que se va a medir ---
+        # SIN 'clean': un clean aqui borraria target\surefire-reports y
+        # target\cucumber-reports, que son los insumos de los reportes HTML
+        # que se generan mas abajo. El resultado seria un reporte con 0 pruebas.
+        Write-Host "[14] Compilando la aplicacion..." -ForegroundColor Yellow
+        cmd /c "mvn -B -q compile 2>&1" | Out-Null
+
+        # --- Levantar el servidor de login en segundo plano ---
+        Write-Host "     Levantando ServidorLogin en http://localhost:8080 ..." -ForegroundColor DarkGray
+        $servidor = Start-Process -FilePath "java" `
+            -ArgumentList "-cp", "target\classes", "cl.iplacex.qa.app.ServidorLogin" `
+            -WorkingDirectory $raiz -PassThru -WindowStyle Hidden `
+            -RedirectStandardOutput "performance\resultados\servidor.log" `
+            -RedirectStandardError  "performance\resultados\servidor-error.log"
+
+        # Espera activa: un sleep fijo seria fragil (o espera de mas, o arranca
+        # la prueba contra un servidor que todavia no escucha).
+        $arriba = $false
+        for ($i = 1; $i -le 30; $i++) {
+            Start-Sleep -Seconds 1
+            try {
+                $r = Invoke-WebRequest -Uri "http://localhost:8080/salud" -UseBasicParsing -TimeoutSec 2
+                if ($r.StatusCode -eq 200) {
+                    $arriba = $true
+                    Write-Host "     Servidor disponible tras $i segundo(s)." -ForegroundColor Green
+                    break
+                }
+            } catch { }
+        }
+
+        if (-not $arriba) {
+            Write-Host "     ATENCION - el servidor no respondio en 30 segundos." -ForegroundColor Red
+            Write-Host "     Revisa performance\resultados\servidor-error.log" -ForegroundColor DarkGray
+            if ($servidor -and -not $servidor.HasExited) { Stop-Process -Id $servidor.Id -Force }
+        } else {
+            try {
+                Grabar -Id "14" -Nombre "performance-k6" `
+                       -Titulo "Prueba de carga sobre el login (TPS, latencia p95/p99, errores)" `
+                       -Comando "k6 run performance\login-performance.js" -EsK6
+            }
+            finally {
+                # Detencion garantizada: sin esto quedaria un java.exe ocupando
+                # el puerto 8080 y la siguiente ejecucion fallaria.
+                if ($servidor -and -not $servidor.HasExited) {
+                    Stop-Process -Id $servidor.Id -Force
+                    Write-Host "     Servidor detenido." -ForegroundColor DarkGray
+                }
+                Write-Host ""
+            }
+        }
     }
 }
- 
+
 # ============================================================================
 #  CAPTURAS 06 y 12 - Reportes HTML navegables: se generan y se abren
 # ============================================================================
 if ($Solo -eq "") {
     Write-Host "[06/12] Generando reportes HTML navegables..." -ForegroundColor Yellow
+
+    # Si no hay resultados de Surefire, el reporte saldria vacio (0 pruebas):
+    # se vuelven a ejecutar las pruebas antes de generarlo.
+    $xml = Get-ChildItem "target\surefire-reports" -Filter "*.xml" -ErrorAction SilentlyContinue
+    if (-not $xml) {
+        Write-Host "     No hay resultados de Surefire; reejecutando las pruebas..." -ForegroundColor DarkYellow
+        cmd /c "mvn -B -q test 2>&1" | Out-Null
+    }
+
     cmd /c "mvn -B surefire-report:report-only site:site -DgenerateReports=false 2>&1" | Out-Null
- 
+
     $reporteUnit = Join-Path $raiz "target\site\surefire-report.html"
     $reporteBdd  = Join-Path $raiz "target\cucumber-reports\cucumber.html"
- 
+
     if (Test-Path $reporteBdd) {
         Write-Host "     CAPTURA 12 - abriendo reporte BDD de Cucumber" -ForegroundColor Green
         Write-Host "     Recuerda expandir un escenario antes de capturar." -ForegroundColor DarkGray
@@ -216,7 +273,7 @@ if ($Solo -eq "") {
     } else {
         Write-Host "     No se encontro cucumber.html. Ejecuta antes 'mvn clean test'." -ForegroundColor Red
     }
- 
+
     if (Test-Path $reporteUnit) {
         Write-Host "     CAPTURA 06 - abriendo reporte de pruebas unitarias" -ForegroundColor Green
         Start-Process $reporteUnit
@@ -225,7 +282,7 @@ if ($Solo -eq "") {
     }
     Write-Host ""
 }
- 
+
 # ============================================================================
 #  Indice de evidencias
 # ============================================================================
@@ -270,7 +327,7 @@ if ($Solo -eq "") {
         "",
         "================================================================================"
     ) | Out-File -FilePath $indice -Encoding utf8
- 
+
     Write-Host "================================================================" -ForegroundColor Cyan
     Write-Host "  LISTO" -ForegroundColor Cyan
     Write-Host "================================================================" -ForegroundColor Cyan
@@ -284,4 +341,3 @@ if ($Solo -eq "") {
     Write-Host ""
     Start-Process explorer.exe $destino
 }
- 
