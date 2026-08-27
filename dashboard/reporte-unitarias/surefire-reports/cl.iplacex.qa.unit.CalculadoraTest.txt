@@ -1,4 +1,4 @@
 -------------------------------------------------------------------------------
 Test set: cl.iplacex.qa.unit.CalculadoraTest
 -------------------------------------------------------------------------------
-Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.091 s -- in cl.iplacex.qa.unit.CalculadoraTest
+Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.108 s -- in cl.iplacex.qa.unit.CalculadoraTest

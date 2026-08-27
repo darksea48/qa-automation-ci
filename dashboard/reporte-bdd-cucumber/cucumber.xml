@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="Cucumber" time="0.224" tests="6" skipped="0" failures="0" errors="0">
+<testsuite name="Cucumber" time="0.235" tests="6" skipped="0" failures="0" errors="0">
 <testcase classname="Autenticación de usuarios en el portal" name="Ingreso exitoso con credenciales válidas" time="0.024">
 <system-out><![CDATA[
 Dado que el portal de autenticación está disponible.........................passed
@@ -8,7 +8,7 @@ Entonces el sistema concede el acceso.......................................pass
 Y se muestra el mensaje "Bienvenido douglas"................................passed
 ]]></system-out>
 </testcase>
-<testcase classname="Autenticación de usuarios en el portal" name="Ingreso rechazado con datos inválidos - Example #1.1" time="0.005">
+<testcase classname="Autenticación de usuarios en el portal" name="Ingreso rechazado con datos inválidos - Example #1.1" time="0.003">
 <system-out><![CDATA[
 Dado que el portal de autenticación está disponible.........................passed
 Cuando el usuario ingresa el usuario "douglas" y la contraseña "Clave999"...passed
@@ -16,7 +16,7 @@ Entonces el sistema deniega el acceso.......................................pass
 Y se muestra el mensaje "Usuario o contraseña incorrectos"..................passed
 ]]></system-out>
 </testcase>
-<testcase classname="Autenticación de usuarios en el portal" name="Ingreso rechazado con datos inválidos - Example #1.2" time="0.002">
+<testcase classname="Autenticación de usuarios en el portal" name="Ingreso rechazado con datos inválidos - Example #1.2" time="0.006">
 <system-out><![CDATA[
 Dado que el portal de autenticación está disponible.........................passed
 Cuando el usuario ingresa el usuario "inexistente" y la contraseña "Clave123".passed
@@ -32,7 +32,7 @@ Entonces el sistema deniega el acceso.......................................pass
 Y se muestra el mensaje "Debe completar usuario y contraseña"...............passed
 ]]></system-out>
 </testcase>
-<testcase classname="Autenticación de usuarios en el portal" name="Ingreso rechazado con datos inválidos - Example #1.4" time="0.002">
+<testcase classname="Autenticación de usuarios en el portal" name="Ingreso rechazado con datos inválidos - Example #1.4" time="0.006">
 <system-out><![CDATA[
 Dado que el portal de autenticación está disponible.........................passed
 Cuando el usuario ingresa el usuario "" y la contraseña "Clave123"..........passed
@@ -40,7 +40,7 @@ Entonces el sistema deniega el acceso.......................................pass
 Y se muestra el mensaje "Debe completar usuario y contraseña"...............passed
 ]]></system-out>
 </testcase>
-<testcase classname="Autenticación de usuarios en el portal" name="Bloqueo de la cuenta tras tres intentos fallidos" time="0.003">
+<testcase classname="Autenticación de usuarios en el portal" name="Bloqueo de la cuenta tras tres intentos fallidos" time="0.005">
 <system-out><![CDATA[
 Dado que el portal de autenticación está disponible.........................passed
 Dado que el usuario "analista" ya registra 3 intentos fallidos..............passed

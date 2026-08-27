@@ -437,53 +437,53 @@ default   [  93% ] 036/100 VUs  2m20.0s/2m30.0s
 running (2m21.0s), 033/100 VUs, 5538 complete and 0 interrupted iterations
 default   [  94% ] 033/100 VUs  2m21.0s/2m30.0s
 
-running (2m22.0s), 030/100 VUs, 5571 complete and 0 interrupted iterations
-default   [  95% ] 030/100 VUs  2m22.0s/2m30.0s
+running (2m22.0s), 029/100 VUs, 5571 complete and 0 interrupted iterations
+default   [  95% ] 029/100 VUs  2m22.0s/2m30.0s
 
-running (2m23.0s), 026/100 VUs, 5601 complete and 0 interrupted iterations
+running (2m23.0s), 026/100 VUs, 5600 complete and 0 interrupted iterations
 default   [  95% ] 026/100 VUs  2m23.0s/2m30.0s
 
-running (2m24.0s), 023/100 VUs, 5627 complete and 0 interrupted iterations
-default   [  96% ] 023/100 VUs  2m24.0s/2m30.0s
+running (2m24.0s), 022/100 VUs, 5626 complete and 0 interrupted iterations
+default   [  96% ] 022/100 VUs  2m24.0s/2m30.0s
 
-running (2m25.0s), 020/100 VUs, 5650 complete and 0 interrupted iterations
-default   [  97% ] 020/100 VUs  2m25.0s/2m30.0s
+running (2m25.0s), 019/100 VUs, 5648 complete and 0 interrupted iterations
+default   [  97% ] 019/100 VUs  2m25.0s/2m30.0s
 
-running (2m26.0s), 016/100 VUs, 5670 complete and 0 interrupted iterations
+running (2m26.0s), 016/100 VUs, 5667 complete and 0 interrupted iterations
 default   [  97% ] 016/100 VUs  2m26.0s/2m30.0s
 
-running (2m27.0s), 012/100 VUs, 5686 complete and 0 interrupted iterations
+running (2m27.0s), 012/100 VUs, 5683 complete and 0 interrupted iterations
 default   [  98% ] 012/100 VUs  2m27.0s/2m30.0s
 
-running (2m28.0s), 009/100 VUs, 5698 complete and 0 interrupted iterations
+running (2m28.0s), 009/100 VUs, 5695 complete and 0 interrupted iterations
 default   [  99% ] 009/100 VUs  2m28.0s/2m30.0s
 
-running (2m29.0s), 006/100 VUs, 5707 complete and 0 interrupted iterations
+running (2m29.0s), 006/100 VUs, 5704 complete and 0 interrupted iterations
 default   [  99% ] 006/100 VUs  2m29.0s/2m30.0s
 
-running (2m30.0s), 002/100 VUs, 5713 complete and 0 interrupted iterations
+running (2m30.0s), 002/100 VUs, 5710 complete and 0 interrupted iterations
 default   [ 100% ] 002/100 VUs  2m30.0s/2m30.0s
 
 ================================================================================
  RESUMEN DE PERFORMANCE - FUNCIONALIDAD LOGIN
  Objetivo medido: http://localhost:8080/auth/login
 ================================================================================
- Peticiones totales        : 5715
- Throughput (TPS)          : 37.97 req/s
+ Peticiones totales        : 5712
+ Throughput (TPS)          : 37.94 req/s
  Usuarios virtuales máx.   : 100
- Iteraciones completadas   : 5715
+ Iteraciones completadas   : 5712
 --------------------------------------------------------------------------------
  LATENCIA
-   Mínima                  : 0.08 ms
-   Promedio                : 0.29 ms
-   Mediana p(50)           : 0.21 ms
-   p(90)                   : 0.49 ms
-   p(95)                   : 0.68 ms   [umbral: < 200 ms]
-   p(99)                   : 1.22 ms   [umbral: < 500 ms]
-   Máxima                  : 4.06 ms
+   Mínima                  : 0.16 ms
+   Promedio                : 0.38 ms
+   Mediana p(50)           : 0.31 ms
+   p(90)                   : 0.61 ms
+   p(95)                   : 0.82 ms   [umbral: < 200 ms]
+   p(99)                   : 1.15 ms   [umbral: < 500 ms]
+   Máxima                  : 4.27 ms
 --------------------------------------------------------------------------------
  DISTRIBUCION DE RESPUESTAS
-   Logins exitosos (200)   : 5715
+   Logins exitosos (200)   : 5712
    Rechazos de negocio     : 0   (4xx: respuesta correcta del servidor)
    Limitadas por tasa      : 0   (429/403: rechazo de un intermediario)
    Errores del servidor    : 0   (5xx: fallo de la aplicacion)
@@ -502,5 +502,5 @@ default   [ 100% ] 002/100 VUs  2m30.0s/2m30.0s
  informe (¿en que nivel de carga se degrado? ¿latencia o estabilidad?).
 ================================================================================
 
-running (2m30.5s), 000/100 VUs, 5715 complete and 0 interrupted iterations
+running (2m30.6s), 000/100 VUs, 5712 complete and 0 interrupted iterations
 default ✓ [ 100% ] 000/100 VUs  2m30s
