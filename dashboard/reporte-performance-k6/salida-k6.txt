@@ -469,18 +469,18 @@ default   [ 100% ] 002/100 VUs  2m30.0s/2m30.0s
  Objetivo medido: http://localhost:8080/auth/login
 ================================================================================
  Peticiones totales        : 5713
- Throughput (TPS)          : 37.96 req/s
+ Throughput (TPS)          : 37.95 req/s
  Usuarios virtuales máx.   : 100
  Iteraciones completadas   : 5713
 --------------------------------------------------------------------------------
  LATENCIA
    Mínima                  : 0.15 ms
-   Promedio                : 0.32 ms
-   Mediana p(50)           : 0.26 ms
-   p(90)                   : 0.47 ms
-   p(95)                   : 0.64 ms   [umbral: < 200 ms]
-   p(99)                   : 1.03 ms   [umbral: < 500 ms]
-   Máxima                  : 5.28 ms
+   Promedio                : 0.37 ms
+   Mediana p(50)           : 0.32 ms
+   p(90)                   : 0.54 ms
+   p(95)                   : 0.75 ms   [umbral: < 200 ms]
+   p(99)                   : 1.12 ms   [umbral: < 500 ms]
+   Máxima                  : 4.15 ms
 --------------------------------------------------------------------------------
  DISTRIBUCION DE RESPUESTAS
    Logins exitosos (200)   : 5713
