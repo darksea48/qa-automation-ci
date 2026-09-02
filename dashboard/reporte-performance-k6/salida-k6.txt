@@ -474,13 +474,13 @@ default   [ 100% ] 002/100 VUs  2m30.0s/2m30.0s
  Iteraciones completadas   : 5714
 --------------------------------------------------------------------------------
  LATENCIA
-   Mínima                  : 0.16 ms
-   Promedio                : 0.35 ms
-   Mediana p(50)           : 0.30 ms
-   p(90)                   : 0.52 ms
-   p(95)                   : 0.63 ms   [umbral: < 200 ms]
-   p(99)                   : 0.99 ms   [umbral: < 500 ms]
-   Máxima                  : 4.21 ms
+   Mínima                  : 0.15 ms
+   Promedio                : 0.34 ms
+   Mediana p(50)           : 0.28 ms
+   p(90)                   : 0.51 ms
+   p(95)                   : 0.73 ms   [umbral: < 200 ms]
+   p(99)                   : 1.08 ms   [umbral: < 500 ms]
+   Máxima                  : 3.81 ms
 --------------------------------------------------------------------------------
  DISTRIBUCION DE RESPUESTAS
    Logins exitosos (200)   : 5714
