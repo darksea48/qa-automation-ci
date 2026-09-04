@@ -443,47 +443,47 @@ default   [  95% ] 030/100 VUs  2m22.0s/2m30.0s
 running (2m23.0s), 026/100 VUs, 5601 complete and 0 interrupted iterations
 default   [  95% ] 026/100 VUs  2m23.0s/2m30.0s
 
-running (2m24.0s), 022/100 VUs, 5627 complete and 0 interrupted iterations
-default   [  96% ] 022/100 VUs  2m24.0s/2m30.0s
+running (2m24.0s), 023/100 VUs, 5627 complete and 0 interrupted iterations
+default   [  96% ] 023/100 VUs  2m24.0s/2m30.0s
 
-running (2m25.0s), 019/100 VUs, 5649 complete and 0 interrupted iterations
-default   [  97% ] 019/100 VUs  2m25.0s/2m30.0s
+running (2m25.0s), 020/100 VUs, 5650 complete and 0 interrupted iterations
+default   [  97% ] 020/100 VUs  2m25.0s/2m30.0s
 
-running (2m26.0s), 016/100 VUs, 5668 complete and 0 interrupted iterations
+running (2m26.0s), 016/100 VUs, 5670 complete and 0 interrupted iterations
 default   [  97% ] 016/100 VUs  2m26.0s/2m30.0s
 
-running (2m27.0s), 012/100 VUs, 5684 complete and 0 interrupted iterations
-default   [  98% ] 012/100 VUs  2m27.0s/2m30.0s
+running (2m27.0s), 013/100 VUs, 5686 complete and 0 interrupted iterations
+default   [  98% ] 013/100 VUs  2m27.0s/2m30.0s
 
-running (2m28.0s), 009/100 VUs, 5696 complete and 0 interrupted iterations
+running (2m28.0s), 009/100 VUs, 5699 complete and 0 interrupted iterations
 default   [  99% ] 009/100 VUs  2m28.0s/2m30.0s
 
-running (2m29.0s), 006/100 VUs, 5705 complete and 0 interrupted iterations
+running (2m29.0s), 006/100 VUs, 5708 complete and 0 interrupted iterations
 default   [  99% ] 006/100 VUs  2m29.0s/2m30.0s
 
-running (2m30.0s), 002/100 VUs, 5711 complete and 0 interrupted iterations
+running (2m30.0s), 002/100 VUs, 5714 complete and 0 interrupted iterations
 default   [ 100% ] 002/100 VUs  2m30.0s/2m30.0s
 
 ================================================================================
  RESUMEN DE PERFORMANCE - FUNCIONALIDAD LOGIN
  Objetivo medido: http://localhost:8080/auth/login
 ================================================================================
- Peticiones totales        : 5713
- Throughput (TPS)          : 37.95 req/s
+ Peticiones totales        : 5716
+ Throughput (TPS)          : 37.98 req/s
  Usuarios virtuales máx.   : 100
- Iteraciones completadas   : 5713
+ Iteraciones completadas   : 5716
 --------------------------------------------------------------------------------
  LATENCIA
-   Mínima                  : 0.17 ms
-   Promedio                : 0.41 ms
-   Mediana p(50)           : 0.32 ms
-   p(90)                   : 0.64 ms
-   p(95)                   : 0.80 ms   [umbral: < 200 ms]
-   p(99)                   : 1.35 ms   [umbral: < 500 ms]
-   Máxima                  : 6.01 ms
+   Mínima                  : 0.08 ms
+   Promedio                : 0.26 ms
+   Mediana p(50)           : 0.18 ms
+   p(90)                   : 0.47 ms
+   p(95)                   : 0.64 ms   [umbral: < 200 ms]
+   p(99)                   : 0.97 ms   [umbral: < 500 ms]
+   Máxima                  : 4.07 ms
 --------------------------------------------------------------------------------
  DISTRIBUCION DE RESPUESTAS
-   Logins exitosos (200)   : 5713
+   Logins exitosos (200)   : 5716
    Rechazos de negocio     : 0   (4xx: respuesta correcta del servidor)
    Limitadas por tasa      : 0   (429/403: rechazo de un intermediario)
    Errores del servidor    : 0   (5xx: fallo de la aplicacion)
@@ -502,5 +502,5 @@ default   [ 100% ] 002/100 VUs  2m30.0s/2m30.0s
  informe (¿en que nivel de carga se degrado? ¿latencia o estabilidad?).
 ================================================================================
 
-running (2m30.5s), 000/100 VUs, 5713 complete and 0 interrupted iterations
+running (2m30.5s), 000/100 VUs, 5716 complete and 0 interrupted iterations
 default ✓ [ 100% ] 000/100 VUs  2m30s
