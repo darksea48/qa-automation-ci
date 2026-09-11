@@ -446,14 +446,14 @@ default   [  95% ] 026/100 VUs  2m23.0s/2m30.0s
 running (2m24.0s), 023/100 VUs, 5627 complete and 0 interrupted iterations
 default   [  96% ] 023/100 VUs  2m24.0s/2m30.0s
 
-running (2m25.0s), 019/100 VUs, 5650 complete and 0 interrupted iterations
-default   [  97% ] 019/100 VUs  2m25.0s/2m30.0s
+running (2m25.0s), 020/100 VUs, 5650 complete and 0 interrupted iterations
+default   [  97% ] 020/100 VUs  2m25.0s/2m30.0s
 
-running (2m26.0s), 016/100 VUs, 5669 complete and 0 interrupted iterations
+running (2m26.0s), 016/100 VUs, 5670 complete and 0 interrupted iterations
 default   [  97% ] 016/100 VUs  2m26.0s/2m30.0s
 
-running (2m27.0s), 013/100 VUs, 5685 complete and 0 interrupted iterations
-default   [  98% ] 013/100 VUs  2m27.0s/2m30.0s
+running (2m27.0s), 012/100 VUs, 5686 complete and 0 interrupted iterations
+default   [  98% ] 012/100 VUs  2m27.0s/2m30.0s
 
 running (2m28.0s), 009/100 VUs, 5698 complete and 0 interrupted iterations
 default   [  99% ] 009/100 VUs  2m28.0s/2m30.0s
@@ -474,13 +474,13 @@ default   [ 100% ] 002/100 VUs  2m30.0s/2m30.0s
  Iteraciones completadas   : 5715
 --------------------------------------------------------------------------------
  LATENCIA
-   Mínima                  : 0.12 ms
-   Promedio                : 0.28 ms
+   Mínima                  : 0.10 ms
+   Promedio                : 0.31 ms
    Mediana p(50)           : 0.22 ms
-   p(90)                   : 0.44 ms
-   p(95)                   : 0.58 ms   [umbral: < 200 ms]
-   p(99)                   : 0.96 ms   [umbral: < 500 ms]
-   Máxima                  : 3.69 ms
+   p(90)                   : 0.54 ms
+   p(95)                   : 0.68 ms   [umbral: < 200 ms]
+   p(99)                   : 1.07 ms   [umbral: < 500 ms]
+   Máxima                  : 4.19 ms
 --------------------------------------------------------------------------------
  DISTRIBUCION DE RESPUESTAS
    Logins exitosos (200)   : 5715
