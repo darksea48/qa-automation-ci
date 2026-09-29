@@ -443,11 +443,11 @@ default   [  95% ] 030/100 VUs  2m22.0s/2m30.0s
 running (2m23.0s), 026/100 VUs, 5601 complete and 0 interrupted iterations
 default   [  95% ] 026/100 VUs  2m23.0s/2m30.0s
 
-running (2m24.0s), 023/100 VUs, 5627 complete and 0 interrupted iterations
-default   [  96% ] 023/100 VUs  2m24.0s/2m30.0s
+running (2m24.0s), 022/100 VUs, 5627 complete and 0 interrupted iterations
+default   [  96% ] 022/100 VUs  2m24.0s/2m30.0s
 
-running (2m25.0s), 019/100 VUs, 5650 complete and 0 interrupted iterations
-default   [  97% ] 019/100 VUs  2m25.0s/2m30.0s
+running (2m25.0s), 020/100 VUs, 5649 complete and 0 interrupted iterations
+default   [  97% ] 020/100 VUs  2m25.0s/2m30.0s
 
 running (2m26.0s), 016/100 VUs, 5669 complete and 0 interrupted iterations
 default   [  97% ] 016/100 VUs  2m26.0s/2m30.0s
@@ -469,18 +469,18 @@ default   [ 100% ] 002/100 VUs  2m30.0s/2m30.0s
  Objetivo medido: http://localhost:8080/auth/login
 ================================================================================
  Peticiones totales        : 5714
- Throughput (TPS)          : 37.96 req/s
+ Throughput (TPS)          : 37.97 req/s
  Usuarios virtuales máx.   : 100
  Iteraciones completadas   : 5714
 --------------------------------------------------------------------------------
  LATENCIA
    Mínima                  : 0.15 ms
-   Promedio                : 0.35 ms
-   Mediana p(50)           : 0.29 ms
-   p(90)                   : 0.53 ms
-   p(95)                   : 0.68 ms   [umbral: < 200 ms]
-   p(99)                   : 1.07 ms   [umbral: < 500 ms]
-   Máxima                  : 4.41 ms
+   Promedio                : 0.27 ms
+   Mediana p(50)           : 0.24 ms
+   p(90)                   : 0.36 ms
+   p(95)                   : 0.45 ms   [umbral: < 200 ms]
+   p(99)                   : 0.77 ms   [umbral: < 500 ms]
+   Máxima                  : 3.94 ms
 --------------------------------------------------------------------------------
  DISTRIBUCION DE RESPUESTAS
    Logins exitosos (200)   : 5714
